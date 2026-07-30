@@ -1,0 +1,64 @@
+<app-page-header title="Open roles" subtitle="Browse what we are hiring for and apply in a minute.">
+  <span actions class="count">{{ jobs().length }} open</span>
+</app-page-header>
+
+<mat-form-field class="search" role="search">
+  <mat-label>Search by title, team or skill</mat-label>
+  <input matInput type="search" [value]="search()" (input)="onSearch($event)" />
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+
+@if (jobs().length) {
+  <ul class="grid">
+    @for (job of jobs(); track job.id) {
+      @let application = applicationFor(job.id);
+
+      <li class="card">
+        <div class="card__head">
+          <h2 class="card__title">{{ job.title }}</h2>
+          <p class="card__meta">
+            <mat-icon inline>apartment</mat-icon>
+            {{ job.department }}
+            <span aria-hidden="true">·</span>
+            <mat-icon inline>place</mat-icon>
+            {{ job.location }}
+            <span aria-hidden="true">·</span>
+            <span class="capitalize">{{ job.employmentType }} · {{ job.workMode }}</span>
+          </p>
+        </div>
+
+        <p class="card__description">{{ job.description }}</p>
+
+        @if (job.requirements.length) {
+          <h3 class="card__subheading">Required skills</h3>
+          <div class="skills">
+            @for (requirement of job.requirements; track requirement) {
+              <span class="skill">{{ requirement }}</span>
+            }
+          </div>
+        }
+
+        <div class="card__actions">
+          @if (application) {
+            <app-status-chip
+              [label]="'Applied · ' + stageLabels[application.stage]"
+              [tone]="stageTone(application.stage)"
+            />
+            <button matButton="outlined" type="button" disabled>Applied</button>
+          } @else {
+            <button matButton="filled" type="button" (click)="apply(job)">
+              <mat-icon>send</mat-icon>
+              Apply
+            </button>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+} @else {
+  <app-empty-state
+    heading="No open roles right now"
+    message="Check back soon — new openings are published here first."
+    icon="work_outline"
+  />
+}

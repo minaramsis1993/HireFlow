@@ -1,7 +1,15 @@
+import { ResumeFile } from './resume.model';
+
 export type CandidateSource = 'careers-site' | 'referral' | 'sourced' | 'agency' | 'job-board';
 
+/**
+ * A person in the talent pool — and, when `userId` is set, the profile behind a
+ * candidate account. Recruiter-sourced people have no account and keep `null`.
+ */
 export interface Candidate {
   readonly id: string;
+  /** The `User` this profile belongs to, or `null` for sourced candidates. */
+  readonly userId: string | null;
   readonly firstName: string;
   readonly lastName: string;
   readonly email: string;
@@ -12,7 +20,8 @@ export interface Candidate {
   readonly yearsOfExperience: number;
   readonly source: CandidateSource;
   readonly skills: readonly string[];
-  readonly resumeUrl: string | null;
+  /** Latest CV on the profile. Each application also keeps the one it was sent with. */
+  readonly resume: ResumeFile | null;
   readonly createdAt: string;
 }
 

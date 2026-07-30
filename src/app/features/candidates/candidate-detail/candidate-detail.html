@@ -42,8 +42,17 @@
       <div class="skills">
         @for (skill of person.skills; track skill) {
           <span class="skill">{{ skill }}</span>
+        } @empty {
+          <span class="application__meta">No skills listed yet.</span>
         }
       </div>
+
+      <h2 class="card__subheading">CV</h2>
+      @if (person.resume; as resume) {
+        <div class="cv"><app-resume-chip [resume]="resume" /></div>
+      } @else {
+        <p class="application__meta">No CV uploaded.</p>
+      }
     </aside>
 
     <section class="card" aria-labelledby="applications-heading">
@@ -52,34 +61,73 @@
       </h2>
 
       @for (application of applications(); track application.id) {
+        @let resume = application.resume ?? person.resume;
+
         <article class="application">
-          <div class="application__text">
-            <a class="application__job" [routerLink]="['/jobs', application.jobId]">
-              {{ application.job.title }}
-            </a>
-            <span class="application__meta">
-              Applied {{ application.appliedAt | date: 'mediumDate' }} · updated
-              {{ application.updatedAt | timeAgo }}
-              @if (application.rating !== null) {
-                · rated {{ application.rating }}/5
-              }
-            </span>
-            @if (application.notes) {
-              <p class="application__notes">{{ application.notes }}</p>
-            }
+          <div class="application__head">
+            <div class="application__text">
+              <a class="application__job" [routerLink]="['/jobs', application.jobId]">
+                {{ application.job.title }}
+              </a>
+              <span class="application__meta">
+                Applied {{ application.appliedAt | date: 'mediumDate' }} · updated
+                {{ application.updatedAt | timeAgo }}
+              </span>
+            </div>
+
+            <mat-form-field class="application__stage" subscriptSizing="dynamic">
+              <mat-label>Stage</mat-label>
+              <mat-select
+                [value]="application.stage"
+                (valueChange)="moveStage(application.id, $event)"
+              >
+                @for (stage of stages; track stage) {
+                  <mat-option [value]="stage">{{ stageLabels[stage] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           </div>
 
-          <mat-form-field class="application__stage" subscriptSizing="dynamic">
-            <mat-label>Stage</mat-label>
-            <mat-select
-              [value]="application.stage"
-              (valueChange)="moveStage(application.id, $event)"
-            >
-              @for (stage of stages; track stage) {
-                <mat-option [value]="stage">{{ stageLabels[stage] }}</mat-option>
-              }
-            </mat-select>
+          <div class="application__row">
+            @if (resume) {
+              <app-resume-chip [resume]="resume" />
+            } @else {
+              <span class="application__meta">No CV on file</span>
+            }
+
+            <app-rating-stars
+              editable
+              [value]="application.rating"
+              [label]="'Rating for ' + application.job.title"
+              (rated)="rate(application.id, $event)"
+            />
+          </div>
+
+          @if (application.coverLetter) {
+            <details class="application__letter">
+              <summary>Cover letter</summary>
+              <p>{{ application.coverLetter }}</p>
+            </details>
+          }
+
+          <mat-form-field class="application__notes" subscriptSizing="dynamic">
+            <mat-label>Notes</mat-label>
+            <textarea
+              matInput
+              rows="2"
+              [value]="noteValue(application)"
+              (input)="onNoteInput(application.id, $event)"
+            ></textarea>
           </mat-form-field>
+
+          @if (noteChanged(application)) {
+            <div class="application__note-actions">
+              <button matButton type="button" (click)="discardNote(application.id)">Cancel</button>
+              <button matButton="filled" type="button" (click)="saveNote(application)">
+                Save note
+              </button>
+            </div>
+          }
         </article>
       } @empty {
         <app-empty-state

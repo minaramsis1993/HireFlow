@@ -1,0 +1,100 @@
+@let account = user();
+@let candidate = profile();
+
+@if (account && candidate) {
+  <app-page-header
+    title="My profile"
+    subtitle="This is what a recruiter sees when they open your application."
+  />
+
+  <div class="detail">
+    <aside class="card" aria-labelledby="account-heading">
+      <h2 class="card__heading" id="account-heading">Account</h2>
+
+      <dl class="facts">
+        <dt>Name</dt>
+        <dd>{{ account.fullName }}</dd>
+
+        <dt>Email</dt>
+        <dd>{{ account.email }}</dd>
+
+        <dt>Role</dt>
+        <dd>{{ roleLabels[account.role] }}</dd>
+      </dl>
+
+      <h2 class="card__subheading">CV</h2>
+      <input
+        #fileInput
+        hidden
+        type="file"
+        [accept]="acceptedType"
+        (change)="onFileSelected($event)"
+      />
+
+      <div class="cv">
+        @if (candidate.resume; as resume) {
+          <app-resume-chip [resume]="resume" />
+        } @else {
+          <p class="cv__empty">No CV uploaded yet.</p>
+        }
+
+        <button matButton="outlined" type="button" (click)="fileInput.click()">
+          <mat-icon>upload_file</mat-icon>
+          {{ candidate.resume ? 'Replace CV' : 'Upload CV (PDF)' }}
+        </button>
+
+        @if (fileError()) {
+          <p class="cv__error" role="alert">{{ fileError() }}</p>
+        }
+      </div>
+    </aside>
+
+    <section class="card" aria-labelledby="details-heading">
+      <h2 class="card__heading" id="details-heading">Details</h2>
+
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field>
+          <mat-label>Headline</mat-label>
+          <input matInput type="text" formControlName="headline" />
+          <mat-hint>One line on what you do — shown under your name.</mat-hint>
+          @if (form.controls.headline.hasError('required') && form.controls.headline.touched) {
+            <mat-error>A headline is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="form__row">
+          <mat-form-field>
+            <mat-label>Location</mat-label>
+            <input matInput type="text" formControlName="location" />
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Phone</mat-label>
+            <input matInput type="tel" formControlName="phone" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field>
+          <mat-label>Years of experience</mat-label>
+          <input matInput type="number" min="0" max="60" formControlName="yearsOfExperience" />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Skills</mat-label>
+          <input matInput type="text" formControlName="skills" />
+          <mat-hint>Comma separated, for example: Angular, TypeScript, Accessibility</mat-hint>
+        </mat-form-field>
+
+        <div class="form__actions">
+          <button matButton="filled" type="submit">Save profile</button>
+        </div>
+      </form>
+    </section>
+  </div>
+} @else {
+  <app-empty-state
+    heading="Profile unavailable"
+    message="Sign in with a candidate account to manage your profile."
+    icon="lock_outline"
+  />
+}

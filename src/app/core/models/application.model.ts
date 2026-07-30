@@ -1,5 +1,6 @@
 import { Candidate } from './candidate.model';
 import { Job } from './job.model';
+import { ResumeFile } from './resume.model';
 
 /** Ordered pipeline stages. Index order drives the kanban column order. */
 export type PipelineStage = 'applied' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected';
@@ -14,7 +15,22 @@ export interface Application {
   readonly appliedAt: string;
   readonly updatedAt: string;
   readonly notes: string;
+  /** Written by the candidate at submission; empty when they skipped it. */
+  readonly coverLetter: string;
+  /** The CV sent with this application, independent of later profile updates. */
+  readonly resume: ResumeFile | null;
 }
+
+/** What the apply flow supplies; the store fills in id, stage and timestamps. */
+export interface ApplicationDraft {
+  readonly jobId: string;
+  readonly candidateId: string;
+  readonly coverLetter?: string;
+  readonly resume?: ResumeFile | null;
+}
+
+/** Bounds for the scorecard rating, shared by the store and the star control. */
+export const RATING_VALUES: readonly number[] = [1, 2, 3, 4, 5];
 
 /** An application joined with its job and candidate, ready for display. */
 export interface ApplicationView extends Application {

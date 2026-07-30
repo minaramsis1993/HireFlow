@@ -79,14 +79,48 @@
 
 .application {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.875rem 0;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1rem 0;
 
   & + & {
     border-top: 1px solid var(--mat-sys-outline-variant);
   }
+}
+
+.application__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.application__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.application__letter {
+  font: var(--mat-sys-body-small);
+
+  summary {
+    cursor: pointer;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  p {
+    margin: 0.5rem 0 0;
+    white-space: pre-line;
+  }
+}
+
+.application__note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .application__text {
@@ -112,10 +146,13 @@
 }
 
 .application__notes {
-  margin: 0.375rem 0 0;
-  font: var(--mat-sys-body-small);
+  width: 100%;
 }
 
 .application__stage {
   flex: 0 0 10rem;
+}
+
+.cv {
+  margin: 0.5rem 0 0;
 }

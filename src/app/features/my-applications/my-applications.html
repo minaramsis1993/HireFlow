@@ -1,0 +1,54 @@
+<app-page-header
+  title="My applications"
+  subtitle="Everything you have submitted, and where each one stands."
+>
+  <span actions class="count">{{ activeCount() }} in progress</span>
+</app-page-header>
+
+@if (applications().length) {
+  <ul class="list">
+    @for (application of applications(); track application.id) {
+      <li class="card">
+        <div class="card__head">
+          <div>
+            <h2 class="card__title">{{ application.job.title }}</h2>
+            <p class="card__meta">
+              {{ application.job.department }}
+              <span aria-hidden="true">·</span>
+              {{ application.job.location }}
+              <span aria-hidden="true">·</span>
+              applied {{ application.appliedAt | date: 'mediumDate' }}
+            </p>
+          </div>
+
+          <app-status-chip
+            [label]="stageLabels[application.stage]"
+            [tone]="stageTone(application.stage)"
+          />
+        </div>
+
+        <div class="card__body">
+          @if (application.resume; as resume) {
+            <app-resume-chip [resume]="resume" />
+          }
+          <span class="card__updated">Updated {{ application.updatedAt | timeAgo }}</span>
+        </div>
+
+        @if (application.coverLetter) {
+          <p class="card__letter">{{ application.coverLetter }}</p>
+        }
+      </li>
+    }
+  </ul>
+} @else {
+  <app-empty-state
+    heading="No applications yet"
+    message="Find a role that fits and send your CV — it takes a minute."
+    icon="assignment"
+  >
+    <a matButton="filled" routerLink="/jobs">
+      <mat-icon>work_outline</mat-icon>
+      Browse open roles
+    </a>
+  </app-empty-state>
+}

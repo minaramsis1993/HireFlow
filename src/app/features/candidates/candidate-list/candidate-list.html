@@ -14,6 +14,8 @@
 @if (results().length) {
   <ul class="grid">
     @for (candidate of results(); track candidate.id) {
+      @let latest = latestApplication(candidate.id);
+
       <li>
         <a class="card" [routerLink]="['/candidates', candidate.id]">
           <span class="card__avatar" aria-hidden="true">{{ initials(candidate) }}</span>
@@ -39,6 +41,16 @@
                 <span class="skill skill--more">+{{ candidate.skills.length - 3 }}</span>
               }
             </span>
+
+            @if (latest) {
+              <span class="card__latest">
+                <app-status-chip
+                  [label]="stageLabels[latest.stage]"
+                  [tone]="stageTone(latest.stage)"
+                />
+                <span class="card__latest-job">{{ latest.job.title }}</span>
+              </span>
+            }
           </span>
 
           <span

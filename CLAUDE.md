@@ -8,7 +8,9 @@ HireFlow — an applicant tracking system (ATS), a minimal Workable. Angular 20 
 
 **There is no backend.** All data comes from in-memory fixtures in `src/app/core/data/seed-data.ts`, held by three signal stores. Product scope, roadmap, and domain model live in `SPEC.md` — read it before adding a feature; update it when scope changes.
 
-Domain in one line: `Job ──< Application >── Candidate`. The **Application** is what moves through the pipeline (`applied → screening → interview → offer → hired`, plus `rejected`).
+Domain in one line: `User ─ Candidate ──< Application >── Job`. The **Application** is what moves through the pipeline (`applied → screening → interview → offer → hired`, plus `rejected`).
+
+Two roles share the app: **recruiters** (dashboard, jobs, candidates, pipeline) and **candidates** (job board, my applications, profile). Authentication is mocked in `localStorage` by `core/auth/auth-service.ts`; demo sign-ins are `recruiter@hireflow.dev` and `candidate@hireflow.dev`, password `password`.
 
 ## Commands
 
@@ -56,6 +58,20 @@ export class ThingStore {
 
 Mutations go through methods that `update()` the signal immutably. Never mutate an array or object in place — nothing will re-render.
 
+### Auth and roles
+
+`AuthService` follows the same store shape and is the only place that touches `localStorage` for identity. It exposes `user`, `role`, `isRecruiter`, `isCandidate`, `homeRoute` and `candidateProfile`, all signals. `login`/`register` are `async` and return `{ ok: true, user } | { ok: false, error }` — keep that shape when the API lands.
+
+Guards live in `core/auth/`:
+
+- `authGuard` — signed in, else `/login?returnUrl=…`.
+- `roleGuard('recruiter')` — role-restricted page; redirects the other role to its home.
+- `roleMatch('candidate')` — `canMatch`, used so `/jobs` resolves to either the recruiter list or the candidate job board.
+
+Add a candidate-only or recruiter-only page by putting `roleGuard(...)` on the route **and** adding the link to the right array in `layout/shell/shell.ts`. Hiding a link is not access control.
+
+Signing in as a candidate calls `CandidateStore.ensureProfileForUser`, so their applications always show up in the recruiter's talent pool. Don't create a parallel profile entity.
+
 ## Angular 20 conventions
 
 This project uses current-generation Angular. Older patterns will fail review or fail to compile.
@@ -84,6 +100,8 @@ These cost time already. Don't rediscover them.
 - **Material button syntax is the v19+ API:** `matButton`, `matButton="filled"`, `matButton="outlined"`, `matIconButton`. Not `mat-raised-button` / `mat-flat-button` / `mat-icon-button`.
 - **`mat-table` row context is `any`.** Indexing a typed `Record` in the template (`labels[row.status]`) fails with TS7053. Add a typed helper method on the component and call that instead — see `statusLabel()` in `job-list.ts`.
 - **Don't put `<mat-menu>` inside projected content.** `PageHeader` projects only `[actions]`; anything else is dropped. Keep the menu as a sibling after `</app-page-header>` — the template reference still resolves. See `job-detail.html`.
+- **Template reference variables are scoped to their control-flow block.** A `#menu` declared inside one `@if` is invisible to a `[matMenuTriggerFor]` inside another. Declare the menu at the top level and put the `@if` inside it — see `shell.html`.
+- **Angular's URL sanitiser strips `blob:` and `data:` from `[href]`.** Uploaded CVs open via `window.open()` in `ResumeChip` for that reason.
 - **Target is ES2022:** no `toSorted`, `toSpliced`, `findLast` on arrays. Use `[...arr].sort()`.
 - **Production bundle budget is 750 kB initial.** Anything imported by `app.config.ts` or an interceptor lands in the eager bundle — that's why `NotificationService` (Material snackbar) is already there. Check `npm run build` output before adding eager dependencies.
 
@@ -100,6 +118,9 @@ These cost time already. Don't rediscover them.
 - Use `await fixture.whenStable()` after an interaction. `detectChanges()` alone doesn't flush signal updates reliably in zoneless.
 - Set required signal inputs with `fixture.componentRef.setInput('id', value)`.
 - Cover new stores with unit specs, and new feature pages with a component spec that renders the real template — that's what catches Material and CDK wiring problems. Existing examples: `job-store.spec.ts`, `job-list.spec.ts`, `pipeline.spec.ts`, `candidate-detail.spec.ts`.
+- **Anything that touches `AuthService` must `localStorage.clear()` in `beforeEach` and `afterEach`.** Karma shares one browser across spec files, so a leftover session or registered account leaks into the next suite.
+- Sign in before creating the fixture for a role-specific page: `await TestBed.inject(AuthService).login({ email: 'candidate@hireflow.dev', password: 'password' })`.
+- `app.routes.spec.ts` drives the real route table through `RouterTestingHarness` — that is where guard and redirect behaviour is covered. Only one harness may be created per test.
 
 ## Don't
 

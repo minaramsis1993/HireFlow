@@ -1,7 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 
 import { SEED_CANDIDATES } from '@core/data/seed-data';
-import { Candidate, CandidateDraft, candidateFullName } from '@core/models';
+import { Candidate, CandidateDraft, candidateFullName, splitFullName, User } from '@core/models';
 import { createId } from '@core/utils/id';
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +16,44 @@ export class CandidateStore {
 
   byId(id: string): Candidate | undefined {
     return this.state().find((candidate) => candidate.id === id);
+  }
+
+  /** The talent-pool profile behind a candidate account. */
+  byUserId(userId: string): Candidate | undefined {
+    return this.state().find((candidate) => candidate.userId === userId);
+  }
+
+  /**
+   * Guarantees a signed-in candidate has a profile, so their applications land
+   * in the recruiter's talent pool. An existing record with the same email is
+   * claimed rather than duplicated — that is the sourced-then-signed-up case.
+   */
+  ensureProfileForUser(user: User): Candidate {
+    const linked = this.byUserId(user.id);
+    if (linked) {
+      return linked;
+    }
+
+    const byEmail = this.state().find((candidate) => candidate.email === user.email);
+    if (byEmail) {
+      this.update(byEmail.id, { userId: user.id });
+      return { ...byEmail, userId: user.id };
+    }
+
+    const { firstName, lastName } = splitFullName(user.fullName);
+    return this.add({
+      userId: user.id,
+      firstName,
+      lastName,
+      email: user.email,
+      phone: '',
+      location: '',
+      headline: 'New applicant',
+      yearsOfExperience: 0,
+      source: 'careers-site',
+      skills: [],
+      resume: null,
+    });
   }
 
   /** Case-insensitive match across name, headline, email and skills. */

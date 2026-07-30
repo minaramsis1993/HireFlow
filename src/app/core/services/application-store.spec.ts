@@ -58,11 +58,29 @@ describe('ApplicationStore', () => {
     const jobId = jobStore.jobs()[0].id;
     const candidateId = candidateStore.candidates()[0].id;
 
-    const created = store.apply(jobId, candidateId);
+    const created = store.apply({ jobId, candidateId });
 
     expect(created.stage).toBe('applied');
     expect(created.rating).toBeNull();
     expect(store.forJob(jobId).some((view) => view.id === created.id)).toBeTrue();
+  });
+
+  it('keeps the CV and cover letter submitted with an application', () => {
+    const jobId = jobStore.jobs()[1].id;
+    const candidateId = candidateStore.candidates()[1].id;
+    const resume = {
+      name: 'cv.pdf',
+      sizeBytes: 1024,
+      mimeType: 'application/pdf',
+      uploadedAt: new Date().toISOString(),
+      url: null,
+    };
+
+    const created = store.apply({ jobId, candidateId, coverLetter: '  Keen to help.  ', resume });
+
+    expect(created.resume).toEqual(resume);
+    expect(created.coverLetter).toBe('Keen to help.');
+    expect(store.hasApplied(candidateId, jobId)).toBeTrue();
   });
 
   it('stamps updatedAt when a stage changes', () => {

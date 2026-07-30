@@ -6,15 +6,19 @@ import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
 
 import {
+  ApplicationView,
   CANDIDATE_SOURCE_LABELS,
   Candidate,
   candidateFullName,
   candidateInitials,
+  PIPELINE_STAGE_LABELS,
 } from '@core/models';
 import { ApplicationStore } from '@core/services/application-store';
 import { CandidateStore } from '@core/services/candidate-store';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { PageHeader } from '@shared/ui/page-header/page-header';
+import { StatusChip } from '@shared/ui/status-chip/status-chip';
+import { pipelineStageTone } from '@shared/ui/status-chip/tone';
 
 @Component({
   selector: 'app-candidate-list',
@@ -26,6 +30,7 @@ import { PageHeader } from '@shared/ui/page-header/page-header';
     MatInputModule,
     PageHeader,
     RouterLink,
+    StatusChip,
   ],
   templateUrl: './candidate-list.html',
   styleUrl: './candidate-list.scss',
@@ -37,6 +42,8 @@ export class CandidateList {
 
   protected readonly search = signal('');
   protected readonly sourceLabels = CANDIDATE_SOURCE_LABELS;
+  protected readonly stageLabels = PIPELINE_STAGE_LABELS;
+  protected readonly stageTone = pipelineStageTone;
   protected readonly initials = candidateInitials;
   protected readonly fullName = candidateFullName;
 
@@ -46,6 +53,13 @@ export class CandidateList {
 
   protected activeApplications(candidateId: string): number {
     return this.applicationStore.forCandidate(candidateId).length;
+  }
+
+  /** Most recent submission, so the card says what they are in the running for. */
+  protected latestApplication(candidateId: string): ApplicationView | undefined {
+    return [...this.applicationStore.forCandidate(candidateId)].sort((a, b) =>
+      b.appliedAt.localeCompare(a.appliedAt),
+    )[0];
   }
 
   protected onSearch(event: Event): void {

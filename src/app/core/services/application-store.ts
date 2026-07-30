@@ -3,6 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { SEED_APPLICATIONS } from '@core/data/seed-data';
 import {
   Application,
+  ApplicationDraft,
   ApplicationView,
   isActiveStage,
   PIPELINE_STAGES,
@@ -79,20 +80,29 @@ export class ApplicationStore {
     this.patch(id, { notes });
   }
 
-  apply(jobId: string, candidateId: string): Application {
+  /** Every application starts in `applied`, wherever it was submitted from. */
+  apply(draft: ApplicationDraft): Application {
     const now = new Date().toISOString();
     const application: Application = {
       id: createId('app'),
-      jobId,
-      candidateId,
+      jobId: draft.jobId,
+      candidateId: draft.candidateId,
       stage: 'applied',
       rating: null,
       appliedAt: now,
       updatedAt: now,
       notes: '',
+      coverLetter: draft.coverLetter?.trim() ?? '',
+      resume: draft.resume ?? null,
     };
     this.state.update((applications) => [application, ...applications]);
     return application;
+  }
+
+  hasApplied(candidateId: string, jobId: string): boolean {
+    return this.state().some(
+      (application) => application.candidateId === candidateId && application.jobId === jobId,
+    );
   }
 
   remove(id: string): void {

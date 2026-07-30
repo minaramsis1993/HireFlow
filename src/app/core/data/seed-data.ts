@@ -1,9 +1,36 @@
-import { Application, Candidate, Job } from '@core/models';
+import { Account, Application, Candidate, Job } from '@core/models';
 
 /**
  * In-memory fixtures so the app is explorable before a backend exists.
  * Swap the stores over to `HttpClient` and this file can be deleted.
  */
+
+/**
+ * Demo sign-ins, one per role. Passwords are plain text because there is no
+ * backend to hash them — see the note on `Account`.
+ */
+export const SEED_ACCOUNTS: readonly Account[] = [
+  {
+    user: {
+      id: 'user-1',
+      fullName: 'Dana Ruiz',
+      email: 'recruiter@hireflow.dev',
+      role: 'recruiter',
+      createdAt: '2026-04-01T09:00:00.000Z',
+    },
+    password: 'password',
+  },
+  {
+    user: {
+      id: 'user-2',
+      fullName: 'Amara Bello',
+      email: 'candidate@hireflow.dev',
+      role: 'candidate',
+      createdAt: '2026-05-06T10:15:00.000Z',
+    },
+    password: 'password',
+  },
+];
 
 export const SEED_JOBS: readonly Job[] = [
   {
@@ -111,6 +138,8 @@ export const SEED_JOBS: readonly Job[] = [
 export const SEED_CANDIDATES: readonly Candidate[] = [
   {
     id: 'cand-1',
+    // Profile behind the demo candidate account.
+    userId: 'user-2',
     firstName: 'Amara',
     lastName: 'Bello',
     email: 'amara.bello@example.com',
@@ -120,11 +149,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 7,
     source: 'referral',
     skills: ['Angular', 'TypeScript', 'RxJS', 'Accessibility'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-05-06T10:15:00.000Z',
   },
   {
     id: 'cand-2',
+    userId: null,
     firstName: 'Tomas',
     lastName: 'Havel',
     email: 'tomas.havel@example.com',
@@ -134,11 +164,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 5,
     source: 'job-board',
     skills: ['Angular', 'Node.js', 'Postgres'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-05-09T08:40:00.000Z',
   },
   {
     id: 'cand-3',
+    userId: null,
     firstName: 'Sofia',
     lastName: 'Marchetti',
     email: 'sofia.marchetti@example.com',
@@ -148,11 +179,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 6,
     source: 'sourced',
     skills: ['Figma', 'Design systems', 'User research'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-05-21T14:05:00.000Z',
   },
   {
     id: 'cand-4',
+    userId: null,
     firstName: 'Noah',
     lastName: 'Fischer',
     email: 'noah.fischer@example.com',
@@ -162,11 +194,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 9,
     source: 'careers-site',
     skills: ['Angular', 'SCSS', 'WCAG', 'Testing'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-05-12T11:20:00.000Z',
   },
   {
     id: 'cand-5',
+    userId: null,
     firstName: 'Leila',
     lastName: 'Haddad',
     email: 'leila.haddad@example.com',
@@ -176,11 +209,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 4,
     source: 'referral',
     skills: ['Sourcing', 'Structured interviews', 'Employer branding'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-06-04T09:30:00.000Z',
   },
   {
     id: 'cand-6',
+    userId: null,
     firstName: 'Kwame',
     lastName: 'Mensah',
     email: 'kwame.mensah@example.com',
@@ -190,11 +224,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 8,
     source: 'agency',
     skills: ['Go', 'Kafka', 'Kubernetes'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-04-15T16:00:00.000Z',
   },
   {
     id: 'cand-7',
+    userId: null,
     firstName: 'Ines',
     lastName: 'Ferreira',
     email: 'ines.ferreira@example.com',
@@ -204,11 +239,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 3,
     source: 'careers-site',
     skills: ['Figma', 'Prototyping', 'Usability testing'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-05-26T13:10:00.000Z',
   },
   {
     id: 'cand-8',
+    userId: null,
     firstName: 'Daniel',
     lastName: 'Okonkwo',
     email: 'daniel.okonkwo@example.com',
@@ -218,11 +254,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 6,
     source: 'job-board',
     skills: ['Angular', 'Web performance', 'Vitest'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-05-15T07:55:00.000Z',
   },
   {
     id: 'cand-9',
+    userId: null,
     firstName: 'Mei',
     lastName: 'Lin',
     email: 'mei.lin@example.com',
@@ -232,11 +269,12 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 7,
     source: 'sourced',
     skills: ['Talent ops', 'ATS migrations', 'Reporting'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-06-09T10:45:00.000Z',
   },
   {
     id: 'cand-10',
+    userId: null,
     firstName: 'Victor',
     lastName: 'Almeida',
     email: 'victor.almeida@example.com',
@@ -246,7 +284,7 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
     yearsOfExperience: 5,
     source: 'agency',
     skills: ['Node.js', 'gRPC', 'Postgres'],
-    resumeUrl: null,
+    resume: null,
     createdAt: '2026-04-20T12:25:00.000Z',
   },
 ];
@@ -261,6 +299,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-05-06T10:20:00.000Z',
     updatedAt: '2026-07-18T15:00:00.000Z',
     notes: 'Strong design-system depth. Panel scheduled with the platform team.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-2',
@@ -271,6 +311,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-05-12T11:25:00.000Z',
     updatedAt: '2026-07-22T09:30:00.000Z',
     notes: 'Offer approved at the top of band. Awaiting signature.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-3',
@@ -281,6 +323,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-05-15T08:00:00.000Z',
     updatedAt: '2026-07-10T11:00:00.000Z',
     notes: 'Good performance background, needs a deeper accessibility check.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-4',
@@ -291,6 +335,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-07-24T08:45:00.000Z',
     updatedAt: '2026-07-24T08:45:00.000Z',
     notes: '',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-5',
@@ -301,6 +347,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-05-21T14:10:00.000Z',
     updatedAt: '2026-07-20T16:20:00.000Z',
     notes: 'Portfolio review went well. Product sense interview next.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-6',
@@ -311,6 +359,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-05-26T13:15:00.000Z',
     updatedAt: '2026-07-14T10:05:00.000Z',
     notes: 'Junior for the band but a very strong research process.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-7',
@@ -321,6 +371,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-06-04T09:35:00.000Z',
     updatedAt: '2026-07-25T12:00:00.000Z',
     notes: 'Verbal offer extended.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-8',
@@ -331,6 +383,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-06-09T10:50:00.000Z',
     updatedAt: '2026-07-01T09:15:00.000Z',
     notes: 'Looking for a role with more operations ownership.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-9',
@@ -341,6 +395,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-04-15T16:05:00.000Z',
     updatedAt: '2026-06-28T08:00:00.000Z',
     notes: 'Signed. Start date 1 September.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-10',
@@ -351,6 +407,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-04-20T12:30:00.000Z',
     updatedAt: '2026-06-30T14:40:00.000Z',
     notes: 'On hold while the requisition is paused.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-11',
@@ -361,6 +419,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-05-28T09:00:00.000Z',
     updatedAt: '2026-06-12T09:00:00.000Z',
     notes: 'Better fit for the engineering requisition.',
+    coverLetter: '',
+    resume: null,
   },
   {
     id: 'app-12',
@@ -371,5 +431,7 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     appliedAt: '2026-07-27T07:30:00.000Z',
     updatedAt: '2026-07-27T07:30:00.000Z',
     notes: '',
+    coverLetter: '',
+    resume: null,
   },
 ];

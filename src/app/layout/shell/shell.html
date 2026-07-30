@@ -1,3 +1,5 @@
+@let account = auth.user();
+
 <mat-toolbar class="shell__toolbar">
   <button
     matIconButton
@@ -9,7 +11,7 @@
     <mat-icon>menu</mat-icon>
   </button>
 
-  <a class="shell__brand" routerLink="/dashboard">
+  <a class="shell__brand" [routerLink]="auth.homeRoute()">
     <mat-icon class="shell__brand-icon" aria-hidden="true">hub</mat-icon>
     <span>Hire<strong>Flow</strong></span>
   </a>
@@ -25,7 +27,34 @@
   >
     <mat-icon>{{ theme.mode() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
   </button>
+
+  @if (account) {
+    <button
+      type="button"
+      class="shell__account"
+      [attr.aria-label]="'Account menu for ' + account.fullName"
+      [matMenuTriggerFor]="accountMenu"
+    >
+      <span class="shell__avatar" aria-hidden="true">{{ initials(account) }}</span>
+    </button>
+  }
 </mat-toolbar>
+
+<!-- Declared at the top level so the toolbar trigger can resolve the reference. -->
+<mat-menu #accountMenu="matMenu">
+  @if (account) {
+    <div class="shell__identity">
+      <span class="shell__identity-name">{{ account.fullName }}</span>
+      <span class="shell__identity-meta">{{ account.email }}</span>
+      <span class="shell__identity-meta">{{ roleLabels[account.role] }}</span>
+    </div>
+    <mat-divider />
+  }
+  <button mat-menu-item type="button" (click)="signOut()">
+    <mat-icon>logout</mat-icon>
+    Sign out
+  </button>
+</mat-menu>
 
 <mat-sidenav-container class="shell__container">
   <mat-sidenav
@@ -36,7 +65,7 @@
   >
     <nav aria-label="Main">
       <mat-nav-list>
-        @for (item of navItems; track item.route) {
+        @for (item of navItems(); track item.route) {
           <a
             mat-list-item
             [routerLink]="item.route"

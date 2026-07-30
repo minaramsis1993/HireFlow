@@ -1,0 +1,13 @@
+.stars {
+  display: inline-flex;
+  align-items: center;
+  color: var(--mat-sys-outline);
+}
+
+.stars__button {
+  --mat-icon-button-state-layer-size: 2rem;
+}
+
+.stars__icon--on {
+  color: var(--mat-sys-primary);
+}
