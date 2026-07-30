@@ -3,7 +3,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 
-import { candidateFullName, PIPELINE_STAGE_LABELS, PipelineStage } from '@core/models';
+import {
+  CANDIDATE_SOURCE_LABELS,
+  CANDIDATE_SOURCES,
+  candidateFullName,
+  isActiveStage,
+  PIPELINE_STAGE_LABELS,
+  PipelineStage,
+} from '@core/models';
 import { ApplicationStore } from '@core/services/application-store';
 import { CandidateStore } from '@core/services/candidate-store';
 import { JobStore } from '@core/services/job-store';
@@ -71,6 +78,53 @@ export class Dashboard {
       share: Math.round((counts[index] / peak) * 100),
     }));
   });
+
+  /** Rows shown in each stat card's hover panel, capped at `maxRows`. */
+  protected readonly maxRows = 5;
+
+  protected readonly openRoleRows = computed(() =>
+    this.jobStore.openJobs().map((job) => ({
+      id: job.id,
+      title: job.title,
+      department: job.department,
+      applicants: this.applicationStore.forJob(job.id).length,
+    })),
+  );
+
+  protected readonly candidateSourceRows = computed(() => {
+    const candidates = this.candidateStore.candidates();
+
+    return CANDIDATE_SOURCES.map((source) => ({
+      source,
+      label: CANDIDATE_SOURCE_LABELS[source],
+      count: candidates.filter((candidate) => candidate.source === source).length,
+    }))
+      .filter((row) => row.count > 0)
+      .sort((a, b) => b.count - a.count);
+  });
+
+  /** Active candidates grouped by requisition — the funnel already covers stages. */
+  protected readonly activeByJobRows = computed(() => {
+    const counts = new Map<string, { id: string; title: string; count: number }>();
+
+    for (const view of this.applicationStore.views()) {
+      if (!isActiveStage(view.stage)) {
+        continue;
+      }
+
+      const row = counts.get(view.jobId) ?? { id: view.jobId, title: view.job.title, count: 0 };
+      counts.set(view.jobId, { ...row, count: row.count + 1 });
+    }
+
+    return [...counts.values()].sort((a, b) => b.count - a.count);
+  });
+
+  protected readonly hiredRows = computed(() =>
+    this.applicationStore
+      .views()
+      .filter((view) => view.stage === 'hired')
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+  );
 
   protected readonly stageLabel = (stage: PipelineStage): string => PIPELINE_STAGE_LABELS[stage];
   protected readonly stageTone = pipelineStageTone;

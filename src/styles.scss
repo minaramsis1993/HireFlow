@@ -1,6 +1,12 @@
 // Angular Material 3 theming. `mat.theme()` emits the `--mat-sys-*` design
 // tokens that every component (and the app's own SCSS) reads from.
 @use '@angular/material' as mat;
+@use '@angular/cdk' as cdk;
+
+// Structural styles for the CDK overlay container. `mat.theme()` does not emit
+// these, and without them every overlay — select and menu panels, dialogs, and
+// the dashboard stat-card popovers — renders unpositioned.
+@include cdk.overlay();
 
 html {
   @include mat.theme(

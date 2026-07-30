@@ -6,6 +6,19 @@
   border-radius: var(--mat-sys-corner-large);
   background-color: var(--mat-sys-surface-container-low);
   border: 1px solid var(--mat-sys-outline-variant);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.stat--interactive {
+  cursor: default;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--mat-sys-primary);
+    background-color: var(--mat-sys-surface-container);
+  }
 }
 
 .stat__icon {
@@ -28,4 +41,21 @@
   margin: 0.25rem 0 0;
   color: var(--mat-sys-on-surface-variant);
   font: var(--mat-sys-body-small);
+}
+
+// Rendered inside the CDK overlay container, so it carries its own chrome.
+.stat-panel {
+  min-width: 15rem;
+  max-width: 22rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--mat-sys-corner-large);
+  background-color: var(--mat-sys-surface-container-high);
+  border: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: var(--mat-sys-level3);
+  color: var(--mat-sys-on-surface);
+}
+
+.stat-panel__title {
+  margin: 0 0 0.5rem;
+  font: var(--mat-sys-title-small);
 }

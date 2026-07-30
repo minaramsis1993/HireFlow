@@ -4,6 +4,62 @@
   gap: 1rem;
 }
 
+// Stat-card hover panels. These nodes are declared here but rendered inside the
+// CDK overlay container; emulated encapsulation follows the declaration site,
+// so these styles still apply.
+.breakdown__caption {
+  margin: 0 0 0.5rem;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.breakdown__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3125rem 0;
+
+  & + .breakdown__row {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.breakdown__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.breakdown__label {
+  font: var(--mat-sys-body-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breakdown__meta {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.breakdown__value {
+  flex: 0 0 auto;
+  font: var(--mat-sys-label-large);
+}
+
+.breakdown__value--muted {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.breakdown__empty,
+.breakdown__more {
+  margin: 0.375rem 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
 .panels {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));

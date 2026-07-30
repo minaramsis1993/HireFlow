@@ -119,6 +119,7 @@
 
 .ticket__job,
 .ticket__rating {
+  display: flex;
   font: var(--mat-sys-body-small);
   color: var(--mat-sys-on-surface-variant);
 }

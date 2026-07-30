@@ -6,11 +6,97 @@
 </app-page-header>
 
 <section class="stats" aria-label="Key metrics">
-  <app-stat-card label="Open roles" [value]="openJobCount()" icon="work_outline" />
-  <app-stat-card label="Candidates" [value]="candidateCount()" icon="people_outline" />
-  <app-stat-card label="Active in pipeline" [value]="activeCount()" icon="filter_alt" />
-  <app-stat-card label="Hired" [value]="hiredCount()" icon="verified" />
+  <app-stat-card
+    label="Open roles"
+    [value]="openJobCount()"
+    icon="work_outline"
+    [details]="openRolesDetails"
+  />
+  <app-stat-card
+    label="Candidates"
+    [value]="candidateCount()"
+    icon="people_outline"
+    [details]="candidatesDetails"
+  />
+  <app-stat-card
+    label="Active in pipeline"
+    [value]="activeCount()"
+    icon="filter_alt"
+    [details]="activeDetails"
+  />
+  <app-stat-card label="Hired" [value]="hiredCount()" icon="verified" [details]="hiredDetails" />
 </section>
+
+<!-- Hover/focus panels for the stat cards above. Rendered in a CDK overlay. -->
+<ng-template #openRolesDetails>
+  <p class="breakdown__caption">Applicants per open role</p>
+
+  @for (row of openRoleRows().slice(0, maxRows); track row.id) {
+    <div class="breakdown__row">
+      <span class="breakdown__text">
+        <span class="breakdown__label">{{ row.title }}</span>
+        <span class="breakdown__meta">{{ row.department }}</span>
+      </span>
+      <span class="breakdown__value">{{ row.applicants }}</span>
+    </div>
+  } @empty {
+    <p class="breakdown__empty">No open roles right now.</p>
+  }
+
+  @if (openRoleRows().length > maxRows) {
+    <p class="breakdown__more">+{{ openRoleRows().length - maxRows }} more</p>
+  }
+</ng-template>
+
+<ng-template #candidatesDetails>
+  <p class="breakdown__caption">Where candidates came from</p>
+
+  @for (row of candidateSourceRows(); track row.source) {
+    <div class="breakdown__row">
+      <span class="breakdown__label">{{ row.label }}</span>
+      <span class="breakdown__value">{{ row.count }}</span>
+    </div>
+  } @empty {
+    <p class="breakdown__empty">No candidates yet.</p>
+  }
+</ng-template>
+
+<ng-template #activeDetails>
+  <p class="breakdown__caption">Active candidates per role</p>
+
+  @for (row of activeByJobRows().slice(0, maxRows); track row.id) {
+    <div class="breakdown__row">
+      <span class="breakdown__label">{{ row.title }}</span>
+      <span class="breakdown__value">{{ row.count }}</span>
+    </div>
+  } @empty {
+    <p class="breakdown__empty">Nobody is active in the pipeline.</p>
+  }
+
+  @if (activeByJobRows().length > maxRows) {
+    <p class="breakdown__more">+{{ activeByJobRows().length - maxRows }} more</p>
+  }
+</ng-template>
+
+<ng-template #hiredDetails>
+  <p class="breakdown__caption">Most recent hires</p>
+
+  @for (row of hiredRows().slice(0, maxRows); track row.id) {
+    <div class="breakdown__row">
+      <span class="breakdown__text">
+        <span class="breakdown__label">{{ fullName(row.candidate) }}</span>
+        <span class="breakdown__meta">{{ row.job.title }}</span>
+      </span>
+      <span class="breakdown__value breakdown__value--muted">{{ row.updatedAt | timeAgo }}</span>
+    </div>
+  } @empty {
+    <p class="breakdown__empty">No hires yet.</p>
+  }
+
+  @if (hiredRows().length > maxRows) {
+    <p class="breakdown__more">+{{ hiredRows().length - maxRows }} more</p>
+  }
+</ng-template>
 
 <div class="panels">
   <section class="panel" aria-labelledby="funnel-heading">
