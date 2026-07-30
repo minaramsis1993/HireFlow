@@ -1,0 +1,60 @@
+<app-page-header
+  title="Candidates"
+  subtitle="Everyone in your talent pool, across all requisitions."
+>
+  <span actions class="count">{{ results().length }} shown</span>
+</app-page-header>
+
+<mat-form-field class="search" role="search">
+  <mat-label>Search by name, skill or location</mat-label>
+  <input matInput type="search" [value]="search()" (input)="onSearch($event)" />
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+
+@if (results().length) {
+  <ul class="grid">
+    @for (candidate of results(); track candidate.id) {
+      <li>
+        <a class="card" [routerLink]="['/candidates', candidate.id]">
+          <span class="card__avatar" aria-hidden="true">{{ initials(candidate) }}</span>
+
+          <span class="card__body">
+            <span class="card__name">{{ fullName(candidate) }}</span>
+            <span class="card__headline">{{ candidate.headline }}</span>
+
+            <span class="card__meta">
+              <mat-icon inline>place</mat-icon>
+              {{ candidate.location }}
+              <span aria-hidden="true">·</span>
+              {{ candidate.yearsOfExperience }} yrs
+              <span aria-hidden="true">·</span>
+              {{ sourceLabels[candidate.source] }}
+            </span>
+
+            <span class="skills">
+              @for (skill of candidate.skills.slice(0, 3); track skill) {
+                <span class="skill">{{ skill }}</span>
+              }
+              @if (candidate.skills.length > 3) {
+                <span class="skill skill--more">+{{ candidate.skills.length - 3 }}</span>
+              }
+            </span>
+          </span>
+
+          <span
+            class="card__count"
+            [attr.aria-label]="'Applications: ' + activeApplications(candidate.id)"
+          >
+            {{ activeApplications(candidate.id) }}
+          </span>
+        </a>
+      </li>
+    }
+  </ul>
+} @else {
+  <app-empty-state
+    heading="No candidates found"
+    message="Try a different search term."
+    icon="person_search"
+  />
+}

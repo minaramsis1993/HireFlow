@@ -1,0 +1,60 @@
+<app-page-header
+  title="Pipeline"
+  subtitle="Drag a candidate onto another stage to move them forward."
+>
+  <mat-form-field actions class="job-filter" subscriptSizing="dynamic">
+    <mat-label>Job</mat-label>
+    <mat-select [value]="jobFilter()" (valueChange)="jobFilter.set($event)">
+      <mat-option value="all">All jobs ({{ total() }})</mat-option>
+      @for (job of jobs(); track job.id) {
+        <mat-option [value]="job.id">{{ job.title }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</app-page-header>
+
+<div class="board" cdkDropListGroup>
+  @for (column of columns(); track column.stage) {
+    <section class="column" [attr.aria-label]="column.label">
+      <header class="column__header">
+        <span class="column__dot" [class]="'column__dot--' + column.tone" aria-hidden="true"></span>
+        <h2 class="column__title">{{ column.label }}</h2>
+        <span class="column__count">{{ column.applications.length }}</span>
+      </header>
+
+      <div
+        class="column__list"
+        cdkDropList
+        [cdkDropListData]="column.stage"
+        (cdkDropListDropped)="onDrop($event)"
+      >
+        @for (application of column.applications; track application.id) {
+          <article class="ticket" cdkDrag [cdkDragData]="application">
+            <div class="ticket__preview" *cdkDragPreview>
+              {{ fullName(application.candidate) }}
+            </div>
+
+            <span class="ticket__avatar" aria-hidden="true">
+              {{ initials(application.candidate) }}
+            </span>
+
+            <div class="ticket__text">
+              <a class="ticket__name" [routerLink]="['/candidates', application.candidateId]">
+                {{ fullName(application.candidate) }}
+              </a>
+              <span class="ticket__job">{{ application.job.title }}</span>
+              @if (application.rating !== null) {
+                <span class="ticket__rating">
+                  <mat-icon inline aria-hidden="true">star</mat-icon>
+                  {{ application.rating }}/5
+                </span>
+              }
+            </div>
+          </article>
+        } @empty {
+          <p class="column__empty">Nothing here</p>
+        }
+      </div>
+    </section>
+  }
+</div>

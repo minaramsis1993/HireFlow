@@ -1,59 +1,71 @@
-# Hireflow
+# HireFlow
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.32.
+An applicant tracking system (ATS) built with **Angular 20**, standalone components, signals, Angular Material 3 and SCSS.
 
-## Development server
-
-To start a local development server, run:
+## Quick start
 
 ```bash
-ng serve
+npm install
+npm start          # dev server on http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+| Script            | What it does                                     |
+| ----------------- | ------------------------------------------------ |
+| `npm start`       | Dev server with the development environment file |
+| `npm run build`   | Production build into `dist/hireflow`            |
+| `npm test`        | Karma + Jasmine in watch mode                    |
+| `npm run test:ci` | Single headless run                              |
+| `npm run lint`    | ESLint over TypeScript and templates             |
+| `npm run format`  | Prettier over `src`                              |
 
-## Code scaffolding
+## What's in the box
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- **Dashboard** — headline metrics, pipeline funnel, recent activity.
+- **Jobs** — filterable requisition list, detail view, create/edit form with typed reactive forms.
+- **Candidates** — searchable talent pool and profile pages with per-application stage control.
+- **Pipeline** — drag-and-drop kanban board (Angular CDK) across the six hiring stages.
 
-```bash
-ng generate component component-name
+Data currently comes from in-memory fixtures in `src/app/core/data/seed-data.ts`, so the UI is explorable without a backend.
+
+## Architecture
+
+```
+src/app/
+├── core/            # singletons: models, stores, interceptors, title strategy
+│   ├── data/        # seed fixtures (delete once the API exists)
+│   ├── interceptors/
+│   ├── models/      # domain types + label/enum tables
+│   ├── services/    # signal stores, notifications, theme
+│   └── utils/
+├── layout/shell/    # toolbar + navigation drawer + routed outlet
+├── shared/          # reusable, presentational pieces
+│   ├── pipes/
+│   └── ui/          # page-header, empty-state, stat-card, status-chip, confirm-dialog
+└── features/        # lazily loaded route bundles
+    ├── dashboard/
+    ├── jobs/
+    ├── candidates/
+    ├── pipeline/
+    └── not-found/
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Path aliases (`@core/*`, `@shared/*`, `@layout/*`, `@features/*`, `@env/*`) are configured in `tsconfig.json`.
 
-```bash
-ng generate --help
-```
+## Conventions
 
-## Building
+- **Zoneless.** `provideZonelessChangeDetection()` is on and `zone.js` is not installed. Change detection is driven by signals, so state must live in signals (or go through `ChangeDetectorRef.markForCheck()`).
+- **OnPush everywhere.** Every component sets `ChangeDetectionStrategy.OnPush`.
+- **Signals over RxJS for state.** Stores hold a private `signal` and expose it read-only; derived values are `computed()`. RxJS is used where it fits — HTTP and CDK breakpoints — bridged with `toSignal()`.
+- **Inputs.** `input()` / `input.required()` signal inputs; route params bind straight to component inputs via `withComponentInputBinding()`.
+- **`inject()`** instead of constructor parameter injection.
+- **Typed reactive forms** built with `FormBuilder.nonNullable`; no `ngModel`.
+- **Theming.** Colours come from Material 3 system variables (`--mat-sys-*`) only — no hard-coded hex — so light and dark both work. `ThemeService` toggles `color-scheme` on `<body>` and persists the choice.
+- **Lazy routes.** Every feature is loaded with `loadComponent` / `loadChildren`.
 
-To build the project run:
+## Replacing the mock data
 
-```bash
-ng build
-```
+The three stores (`JobStore`, `CandidateStore`, `ApplicationStore`) are the only places that touch data. Swap the seeded `signal` for `HttpClient` calls inside those files and the rest of the app is unaffected: `apiBaseUrlInterceptor` already prefixes relative URLs with `environment.apiBaseUrl`, and `errorInterceptor` surfaces failures through the snackbar.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Testing
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Specs run against the real browser through Karma. Alongside the store unit tests there are component specs (`job-list`, `pipeline`, `candidate-detail`) that render Material and CDK templates, which is where wiring problems tend to show up. TestBed configurations must include `provideZonelessChangeDetection()`.

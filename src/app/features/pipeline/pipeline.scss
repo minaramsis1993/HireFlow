@@ -1,0 +1,146 @@
+.job-filter {
+  min-width: 14rem;
+}
+
+.board {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(15rem, 1fr);
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-height: 12rem;
+  border-radius: var(--mat-sys-corner-large);
+  background-color: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
+.column__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.column__title {
+  margin: 0;
+  flex: 1 1 auto;
+  font: var(--mat-sys-title-small);
+}
+
+.column__count {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.column__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--mat-sys-outline);
+}
+
+.column__dot--info {
+  background-color: var(--mat-sys-secondary);
+}
+.column__dot--success {
+  background-color: var(--mat-sys-primary);
+}
+.column__dot--warning {
+  background-color: var(--mat-sys-tertiary);
+}
+.column__dot--danger {
+  background-color: var(--mat-sys-error);
+}
+
+.column__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  padding: 0.625rem;
+  min-height: 4rem;
+}
+
+.column__empty {
+  margin: auto;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ticket {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem;
+  border-radius: var(--mat-sys-corner-medium);
+  background-color: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.ticket__avatar {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 50%;
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font: var(--mat-sys-label-medium);
+}
+
+.ticket__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ticket__name {
+  color: inherit;
+  font: var(--mat-sys-body-medium);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.ticket__job,
+.ticket__rating {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ticket__preview {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--mat-sys-corner-medium);
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font: var(--mat-sys-body-medium);
+  box-shadow: var(--mat-sys-level3);
+}
+
+// CDK drag-drop state hooks.
+.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .ticket:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}

@@ -1,0 +1,122 @@
+@let currentJob = job();
+
+@if (currentJob) {
+  <app-page-header
+    [title]="currentJob.title"
+    [subtitle]="currentJob.department + ' · ' + currentJob.location"
+  >
+    <a actions matButton routerLink="/jobs">
+      <mat-icon>arrow_back</mat-icon>
+      All jobs
+    </a>
+    <a actions matButton="outlined" [routerLink]="['/jobs', currentJob.id, 'edit']">
+      <mat-icon>edit</mat-icon>
+      Edit
+    </a>
+    <button
+      actions
+      matIconButton
+      type="button"
+      aria-label="More actions"
+      [matMenuTriggerFor]="menu"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </app-page-header>
+
+  <!-- Kept outside the header so it is never subject to content projection. -->
+  <mat-menu #menu="matMenu">
+    @for (status of statuses; track status) {
+      <button
+        mat-menu-item
+        type="button"
+        [disabled]="status === currentJob.status"
+        (click)="changeStatus(status)"
+      >
+        Mark as {{ statusLabels[status] }}
+      </button>
+    }
+    <mat-divider />
+    <button mat-menu-item type="button" (click)="deleteJob()">
+      <mat-icon>delete_outline</mat-icon>
+      Delete job
+    </button>
+  </mat-menu>
+
+  <div class="detail">
+    <section class="card" aria-labelledby="overview-heading">
+      <h2 class="card__heading" id="overview-heading">Overview</h2>
+      <p class="card__body">{{ currentJob.description }}</p>
+
+      <h3 class="card__subheading">Requirements</h3>
+      <ul class="requirements">
+        @for (requirement of currentJob.requirements; track requirement) {
+          <li>{{ requirement }}</li>
+        }
+      </ul>
+    </section>
+
+    <aside class="card" aria-labelledby="facts-heading">
+      <h2 class="card__heading" id="facts-heading">Details</h2>
+      <dl class="facts">
+        <dt>Status</dt>
+        <dd>
+          <app-status-chip
+            [label]="statusLabels[currentJob.status]"
+            [tone]="statusTone(currentJob.status)"
+          />
+        </dd>
+
+        <dt>Openings</dt>
+        <dd>{{ currentJob.openings }}</dd>
+
+        <dt>Employment</dt>
+        <dd class="capitalize">{{ currentJob.employmentType }} · {{ currentJob.workMode }}</dd>
+
+        <dt>Salary</dt>
+        <dd>
+          {{ currentJob.salary.min | currency: currentJob.salary.currency : 'symbol' : '1.0-0' }} –
+          {{ currentJob.salary.max | currency: currentJob.salary.currency : 'symbol' : '1.0-0' }}
+        </dd>
+
+        <dt>Hiring manager</dt>
+        <dd>{{ currentJob.hiringManager }}</dd>
+
+        <dt>Created</dt>
+        <dd>{{ currentJob.createdAt | date: 'mediumDate' }}</dd>
+      </dl>
+    </aside>
+  </div>
+
+  <section class="card applicants" aria-labelledby="applicants-heading">
+    <h2 class="card__heading" id="applicants-heading">Applicants ({{ applicants().length }})</h2>
+
+    @for (application of applicants(); track application.id) {
+      <a class="applicant" [routerLink]="['/candidates', application.candidateId]">
+        <div class="applicant__text">
+          <span class="applicant__name">{{ fullName(application.candidate) }}</span>
+          <span class="applicant__meta">{{ application.candidate.headline }}</span>
+        </div>
+        <app-status-chip
+          [label]="stageLabels[application.stage]"
+          [tone]="stageTone(application.stage)"
+        />
+        <span class="applicant__time">{{ application.updatedAt | timeAgo }}</span>
+      </a>
+    } @empty {
+      <app-empty-state
+        heading="No applicants yet"
+        message="Share the role or source candidates to start filling this pipeline."
+        icon="person_search"
+      />
+    }
+  </section>
+} @else {
+  <app-empty-state
+    heading="Job not found"
+    message="This requisition may have been deleted."
+    icon="search_off"
+  >
+    <a matButton="filled" routerLink="/jobs">Back to jobs</a>
+  </app-empty-state>
+}

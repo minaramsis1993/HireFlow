@@ -1,0 +1,53 @@
+<app-page-header title="Dashboard" subtitle="Hiring at a glance across every open requisition.">
+  <a actions matButton="filled" routerLink="/jobs/new">
+    <mat-icon>add</mat-icon>
+    New job
+  </a>
+</app-page-header>
+
+<section class="stats" aria-label="Key metrics">
+  <app-stat-card label="Open roles" [value]="openJobCount()" icon="work_outline" />
+  <app-stat-card label="Candidates" [value]="candidateCount()" icon="people_outline" />
+  <app-stat-card label="Active in pipeline" [value]="activeCount()" icon="filter_alt" />
+  <app-stat-card label="Hired" [value]="hiredCount()" icon="verified" />
+</section>
+
+<div class="panels">
+  <section class="panel" aria-labelledby="funnel-heading">
+    <h2 class="panel__heading" id="funnel-heading">Pipeline funnel</h2>
+
+    @for (row of funnel(); track row.stage) {
+      <div class="funnel__row">
+        <span class="funnel__label">{{ row.label }}</span>
+        <span class="funnel__track">
+          <span class="funnel__bar" [style.width.%]="row.share"></span>
+        </span>
+        <span class="funnel__count">{{ row.count }}</span>
+      </div>
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="activity-heading">
+    <h2 class="panel__heading" id="activity-heading">Recent activity</h2>
+
+    @for (application of recent(); track application.id) {
+      <a class="activity" [routerLink]="['/candidates', application.candidateId]">
+        <div class="activity__text">
+          <span class="activity__name">{{ fullName(application.candidate) }}</span>
+          <span class="activity__meta">{{ application.job.title }}</span>
+        </div>
+        <app-status-chip
+          [label]="stageLabel(application.stage)"
+          [tone]="stageTone(application.stage)"
+        />
+        <span class="activity__time">{{ application.updatedAt | timeAgo }}</span>
+      </a>
+    } @empty {
+      <app-empty-state
+        heading="No activity yet"
+        message="Applications will show up here as candidates move through your pipeline."
+        icon="history"
+      />
+    }
+  </section>
+</div>

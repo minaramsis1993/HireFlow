@@ -1,0 +1,101 @@
+@let person = candidate();
+
+@if (person) {
+  <app-page-header [title]="fullName(person)" [subtitle]="person.headline">
+    <a actions matButton routerLink="/candidates">
+      <mat-icon>arrow_back</mat-icon>
+      All candidates
+    </a>
+    <a actions matButton="outlined" [href]="'mailto:' + person.email">
+      <mat-icon>mail_outline</mat-icon>
+      Email
+    </a>
+  </app-page-header>
+
+  <div class="detail">
+    <aside class="card profile">
+      <span class="profile__avatar" aria-hidden="true">{{ initials(person) }}</span>
+
+      <dl class="facts">
+        <dt>Email</dt>
+        <dd>
+          <a [href]="'mailto:' + person.email">{{ person.email }}</a>
+        </dd>
+
+        <dt>Phone</dt>
+        <dd>{{ person.phone }}</dd>
+
+        <dt>Location</dt>
+        <dd>{{ person.location }}</dd>
+
+        <dt>Experience</dt>
+        <dd>{{ person.yearsOfExperience }} years</dd>
+
+        <dt>Source</dt>
+        <dd>{{ sourceLabels[person.source] }}</dd>
+
+        <dt>Added</dt>
+        <dd>{{ person.createdAt | date: 'mediumDate' }}</dd>
+      </dl>
+
+      <h2 class="card__subheading">Skills</h2>
+      <div class="skills">
+        @for (skill of person.skills; track skill) {
+          <span class="skill">{{ skill }}</span>
+        }
+      </div>
+    </aside>
+
+    <section class="card" aria-labelledby="applications-heading">
+      <h2 class="card__heading" id="applications-heading">
+        Applications ({{ applications().length }})
+      </h2>
+
+      @for (application of applications(); track application.id) {
+        <article class="application">
+          <div class="application__text">
+            <a class="application__job" [routerLink]="['/jobs', application.jobId]">
+              {{ application.job.title }}
+            </a>
+            <span class="application__meta">
+              Applied {{ application.appliedAt | date: 'mediumDate' }} · updated
+              {{ application.updatedAt | timeAgo }}
+              @if (application.rating !== null) {
+                · rated {{ application.rating }}/5
+              }
+            </span>
+            @if (application.notes) {
+              <p class="application__notes">{{ application.notes }}</p>
+            }
+          </div>
+
+          <mat-form-field class="application__stage" subscriptSizing="dynamic">
+            <mat-label>Stage</mat-label>
+            <mat-select
+              [value]="application.stage"
+              (valueChange)="moveStage(application.id, $event)"
+            >
+              @for (stage of stages; track stage) {
+                <mat-option [value]="stage">{{ stageLabels[stage] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </article>
+      } @empty {
+        <app-empty-state
+          heading="Not applied to anything yet"
+          message="Add this candidate to an open requisition to start their pipeline."
+          icon="assignment_ind"
+        />
+      }
+    </section>
+  </div>
+} @else {
+  <app-empty-state
+    heading="Candidate not found"
+    message="This profile may have been removed."
+    icon="search_off"
+  >
+    <a matButton="filled" routerLink="/candidates">Back to candidates</a>
+  </app-empty-state>
+}

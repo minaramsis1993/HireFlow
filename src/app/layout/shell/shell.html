@@ -1,0 +1,62 @@
+<mat-toolbar class="shell__toolbar">
+  <button
+    matIconButton
+    type="button"
+    aria-label="Toggle navigation"
+    matTooltip="Toggle navigation"
+    (click)="toggleDrawer()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <a class="shell__brand" routerLink="/dashboard">
+    <mat-icon class="shell__brand-icon" aria-hidden="true">hub</mat-icon>
+    <span>Hire<strong>Flow</strong></span>
+  </a>
+
+  <span class="shell__spacer"></span>
+
+  <button
+    matIconButton
+    type="button"
+    [attr.aria-label]="theme.mode() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'"
+    matTooltip="Toggle theme"
+    (click)="theme.toggle()"
+  >
+    <mat-icon>{{ theme.mode() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-sidenav-container class="shell__container">
+  <mat-sidenav
+    class="shell__sidenav"
+    [mode]="drawerMode()"
+    [opened]="drawerOpen()"
+    [disableClose]="drawerMode() === 'side'"
+  >
+    <nav aria-label="Main">
+      <mat-nav-list>
+        @for (item of navItems; track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive
+            #link="routerLinkActive"
+            [activated]="link.isActive"
+            [attr.aria-current]="link.isActive ? 'page' : null"
+            (click)="closeIfCompact()"
+          >
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      </mat-nav-list>
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <main class="shell__content" id="main-content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

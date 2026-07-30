@@ -1,0 +1,87 @@
+<app-page-header title="Jobs" subtitle="Every requisition, open or archived.">
+  <a actions matButton="filled" routerLink="/jobs/new">
+    <mat-icon>add</mat-icon>
+    New job
+  </a>
+</app-page-header>
+
+<form class="filters" role="search" (submit)="$event.preventDefault()">
+  <mat-form-field class="filters__search">
+    <mat-label>Search</mat-label>
+    <input matInput type="search" [value]="search()" (input)="onSearch($event)" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Status</mat-label>
+    <mat-select [value]="status()" (valueChange)="status.set($event)">
+      <mat-option value="all">All statuses</mat-option>
+      @for (option of statuses; track option) {
+        <mat-option [value]="option">{{ statusLabels[option] }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Department</mat-label>
+    <mat-select [value]="department()" (valueChange)="department.set($event)">
+      <mat-option value="all">All departments</mat-option>
+      @for (option of departments(); track option) {
+        <mat-option [value]="option">{{ option }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (hasFilters()) {
+    <button matButton type="button" (click)="clearFilters()">Clear</button>
+  }
+</form>
+
+@if (filteredJobs().length) {
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="filteredJobs()" class="jobs-table">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Role</th>
+        <td mat-cell *matCellDef="let job">
+          <a class="jobs-table__link" [routerLink]="['/jobs', job.id]">{{ job.title }}</a>
+          <span class="jobs-table__sub">{{ job.location }} · {{ job.workMode }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="department">
+        <th mat-header-cell *matHeaderCellDef>Department</th>
+        <td mat-cell *matCellDef="let job">{{ job.department }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let job">
+          <app-status-chip [label]="statusLabel(job.status)" [tone]="statusTone(job.status)" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="openings">
+        <th mat-header-cell *matHeaderCellDef class="numeric">Openings</th>
+        <td mat-cell *matCellDef="let job" class="numeric">{{ job.openings }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="applicants">
+        <th mat-header-cell *matHeaderCellDef class="numeric">Applicants</th>
+        <td mat-cell *matCellDef="let job" class="numeric">{{ applicantCount(job.id) }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+  </div>
+} @else {
+  <app-empty-state
+    heading="No jobs match those filters"
+    message="Try widening your search, or create a new requisition."
+    icon="work_off"
+  >
+    @if (hasFilters()) {
+      <button matButton="outlined" type="button" (click)="clearFilters()">Clear filters</button>
+    }
+  </app-empty-state>
+}

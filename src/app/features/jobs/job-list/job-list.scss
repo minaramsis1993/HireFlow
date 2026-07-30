@@ -1,0 +1,45 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.filters__search {
+  flex: 1 1 18rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--mat-sys-corner-large);
+  border: 1px solid var(--mat-sys-outline-variant);
+  background-color: var(--mat-sys-surface-container-low);
+}
+
+.jobs-table {
+  width: 100%;
+  background: transparent;
+}
+
+.jobs-table__link {
+  display: block;
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.jobs-table__sub {
+  display: block;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+  text-transform: capitalize;
+}
+
+.numeric {
+  text-align: right;
+}

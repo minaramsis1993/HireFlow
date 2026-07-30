@@ -1,0 +1,136 @@
+@if (notFound()) {
+  <app-empty-state
+    heading="Job not found"
+    message="This requisition may have been deleted."
+    icon="search_off"
+  >
+    <a matButton="filled" routerLink="/jobs">Back to jobs</a>
+  </app-empty-state>
+} @else {
+  <app-page-header
+    [title]="isEdit() ? 'Edit job' : 'New job'"
+    subtitle="Requisition details drive what candidates see on the careers site."
+  >
+    <a actions matButton routerLink="/jobs">Cancel</a>
+  </app-page-header>
+
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+    <section class="form__section">
+      <h2 class="form__heading">Role</h2>
+
+      <div class="form__grid">
+        <mat-form-field class="span-2">
+          <mat-label>Job title</mat-label>
+          <input matInput formControlName="title" required autocomplete="off" />
+          @if (form.controls.title.hasError('required')) {
+            <mat-error>A job title is required.</mat-error>
+          } @else if (form.controls.title.hasError('maxlength')) {
+            <mat-error>Keep the title under 80 characters.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Department</mat-label>
+          <input matInput formControlName="department" required />
+          <mat-error>A department is required.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" required />
+          <mat-error>A location is required.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Work mode</mat-label>
+          <mat-select formControlName="workMode">
+            @for (mode of workModes; track mode) {
+              <mat-option [value]="mode" class="capitalize">{{ mode }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Employment type</mat-label>
+          <mat-select formControlName="employmentType">
+            @for (type of employmentTypes; track type) {
+              <mat-option [value]="type" class="capitalize">{{ type }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (status of statuses; track status) {
+              <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Openings</mat-label>
+          <input matInput type="number" formControlName="openings" min="1" max="99" required />
+          <mat-error>Enter between 1 and 99 openings.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Hiring manager</mat-label>
+          <input matInput formControlName="hiringManager" required />
+          <mat-error>A hiring manager is required.</mat-error>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__heading">Compensation</h2>
+
+      <div class="form__grid">
+        <mat-form-field>
+          <mat-label>Minimum</mat-label>
+          <input matInput type="number" formControlName="salaryMin" min="0" required />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Maximum</mat-label>
+          <input matInput type="number" formControlName="salaryMax" min="0" required />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Currency</mat-label>
+          <input matInput formControlName="currency" maxlength="3" required />
+        </mat-form-field>
+      </div>
+
+      @if (form.hasError('salaryRange')) {
+        <p class="form__error" role="alert">
+          The maximum salary must be greater than or equal to the minimum.
+        </p>
+      }
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__heading">Description</h2>
+
+      <mat-form-field class="form__full">
+        <mat-label>About the role</mat-label>
+        <textarea matInput formControlName="description" rows="5" required></textarea>
+        <mat-hint align="end">{{ form.controls.description.value.length }} / 2000</mat-hint>
+        <mat-error>A description is required.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="form__full">
+        <mat-label>Requirements (one per line)</mat-label>
+        <textarea matInput formControlName="requirements" rows="4"></textarea>
+      </mat-form-field>
+    </section>
+
+    <div class="form__actions">
+      <a matButton routerLink="/jobs">Cancel</a>
+      <button matButton="filled" type="submit">
+        <mat-icon>check</mat-icon>
+        {{ isEdit() ? 'Save changes' : 'Create job' }}
+      </button>
+    </div>
+  </form>
+}
