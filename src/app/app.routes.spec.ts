@@ -25,7 +25,8 @@ describe('app routes', () => {
         provideZonelessChangeDetection(),
         provideRouter(routes, withComponentInputBinding()),
         provideLocationMocks(),
-        // Mirrors `app.config.ts`, since this drives the real route table.
+        // This drives the real route table, so it needs a provider — the
+        // offline mock, so no spec can depend on a key or reach the network.
         { provide: AiProvider, useExisting: MockAiProvider },
       ],
     });

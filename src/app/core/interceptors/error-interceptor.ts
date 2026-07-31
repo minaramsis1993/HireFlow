@@ -1,8 +1,15 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 
 import { NotificationService } from '@core/services/notification-service';
+
+/**
+ * Opts a request out of the global snackbar, for callers that already surface
+ * the failure themselves. CV screening does: the message lands on the
+ * evaluation card, and a toast on top of it reports the same thing twice.
+ */
+export const SKIP_ERROR_NOTIFICATION = new HttpContextToken<boolean>(() => false);
 
 /** Surfaces transport failures once, then rethrows so callers can still react. */
 export const errorInterceptor: HttpInterceptorFn = (request, next) => {
@@ -10,7 +17,10 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
 
   return next(request).pipe(
     catchError((error: unknown) => {
-      notifications.error(toMessage(error));
+      if (!request.context.get(SKIP_ERROR_NOTIFICATION)) {
+        notifications.error(toMessage(error));
+      }
+
       return throwError(() => error);
     }),
   );

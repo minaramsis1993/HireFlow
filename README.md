@@ -18,6 +18,20 @@ npm start          # dev server on http://localhost:4200
 | `npm run lint`    | ESLint over TypeScript and templates             |
 | `npm run format`  | Prettier over `src`                              |
 
+### AI CV screening
+
+Screening is optional. Without a key the app falls back to an offline mock that scores the CV text
+against the job's requirements, so everything below works out of the box.
+
+To screen with a real model, paste a [Google AI Studio](https://aistudio.google.com/apikey) key into
+`gemini.apiKey` in `src/environments/environment.development.ts` and restart the dev server.
+
+**Do not commit that key, and do not put one in `src/environments/environment.ts`** — both files are
+tracked, and anything in the production environment file ships inside the JS bundle where every
+visitor can read it. For a real deployment, restrict the key by HTTP referrer and to the Generative
+Language API in the Google Cloud console, then point `gemini.baseUrl` at your own backend proxy so
+the key never reaches the browser at all.
+
 ## What's in the box
 
 - **Dashboard** — headline metrics, pipeline funnel, recent activity.

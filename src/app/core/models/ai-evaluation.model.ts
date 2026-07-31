@@ -55,7 +55,7 @@ export class AiEvaluationFormatError extends Error {
  * to defend itself.
  */
 export function parseAiEvaluation(raw: string, model: string): AiEvaluation {
-  const payload = parseJsonObject(raw);
+  const payload = extractJsonObject(raw);
 
   const summary = typeof payload['summary'] === 'string' ? payload['summary'].trim() : '';
   if (!summary) {
@@ -76,7 +76,14 @@ export function parseAiEvaluation(raw: string, model: string): AiEvaluation {
   };
 }
 
-function parseJsonObject(raw: string): Record<string, unknown> {
+/**
+ * Pulls the JSON object out of raw model output, or throws.
+ *
+ * Exported because a provider that retries on unusable output has to ask
+ * exactly the question `parseAiEvaluation` will ask — a looser check retries
+ * responses that would have parsed, a stricter one gives up on ones that would.
+ */
+export function extractJsonObject(raw: string): Record<string, unknown> {
   // Models habitually wrap JSON in ```json fences despite being told not to.
   const unfenced = raw
     .trim()

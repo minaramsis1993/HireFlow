@@ -14,7 +14,7 @@ import {
 } from '@angular/router';
 
 import { AiProvider } from '@core/ai/ai-provider';
-import { MockAiProvider } from '@core/ai/mock-ai-provider';
+import { GeminiAiProvider } from '@core/ai/gemini-ai-provider';
 import { AppTitleStrategy } from '@core/app-title-strategy';
 import { apiBaseUrlInterceptor } from '@core/interceptors/api-base-url-interceptor';
 import { errorInterceptor } from '@core/interceptors/error-interceptor';
@@ -34,10 +34,11 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(withFetch(), withInterceptors([apiBaseUrlInterceptor, errorInterceptor])),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
-    // The seam for CV screening. Swapping to OpenAI, Claude, Gemini or Ollama
-    // means writing one class against `IAiProvider` and changing this line.
-    // Nothing else in the app moves.
-    { provide: AiProvider, useExisting: MockAiProvider },
+    // The seam for CV screening. Swapping to OpenAI, Claude or Ollama means
+    // writing one class against `IAiProvider` and changing this line. Nothing
+    // else in the app moves. Gemini calls the API when a key is configured in
+    // the environment file, and falls back to the offline mock when it isn't.
+    { provide: AiProvider, useExisting: GeminiAiProvider },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
   ],
 };

@@ -78,7 +78,7 @@ Both roles resolve `/jobs`, to different pages — recruiters get the requisitio
 
 ## Future features
 
-**Next:** a real `IAiProvider` implementation to replace `MockAiProvider` · scorecards for structured interview feedback · interview scheduling with calendar invites · in-app email threads per candidate · custom stages per job · bulk actions.
+**Next:** a backend proxy for the Gemini call, so the API key leaves the bundle · scorecards for structured interview feedback · interview scheduling with calendar invites · in-app email threads per candidate · custom stages per job · bulk actions.
 
 **Later:** job-board distribution (Indeed, LinkedIn) · referral portal · reporting on time-to-hire and source quality · branded careers page · screening questions.
 
@@ -128,7 +128,7 @@ PDF → ResumeParserService → PromptBuilderService → IAiProvider → AiEvalu
 - **`IAiProvider`** (abstract class `AiProvider`, used as its own DI token) sends a prompt and returns the model's **raw text**. It never parses — `parseAiEvaluation` in `core/models` validates once for every provider, clamping ranges, unwrapping code fences and mapping invented stage names onto real `PipelineStage` values.
 - **`AiEvaluationService`** orchestrates the above, holds per-application progress in a signal, and is the only AI class a component touches.
 
-`MockAiProvider` scores the extracted CV text against the job's requirements — no network, no API key — and is wired in `app.config.ts`. **Swapping to OpenAI, Claude, Gemini or Ollama means writing one class against `IAiProvider` and changing that one line.** Nothing else moves.
+`GeminiAiProvider` is wired in `app.config.ts`. It sends the prompt to Google Gemini's `generateContent` endpoint, constrained with `responseSchema` so the model is schema-bound as well as instructed, and retries once if the response still comes back unreadable. `GeminiApiService` owns the transport and maps every failure onto a typed, user-safe message — those strings land verbatim on the evaluation card, so they never carry the key, the URL or the response body. The key comes from `environment.gemini.apiKey`; with none set, the provider delegates to `MockAiProvider`, which scores the extracted CV text against the job's requirements offline so a fresh clone still demonstrates the whole pipeline. **Swapping to OpenAI, Claude or Ollama means writing one class against `IAiProvider` and changing that one line.** Nothing else moves.
 
 Screening runs automatically in the background when a candidate submits, and a recruiter can re-run it from the candidate profile. The finished `AiEvaluation` is stored on the `Application` along with the extracted `resumeText`, which is what makes a re-run work after a reload — by then the uploaded `File` and its object URL are both gone. `attachEvaluation` deliberately leaves `updatedAt` alone so background screening does not reorder the dashboard's recent activity.
 
@@ -221,4 +221,4 @@ Planned: `features/careers/` (public, no account), `features/settings/`, `featur
 5. Email provider — and do we need inbound replies landing on the candidate record?
 6. Do hiring manager and interviewer become roles, or per-job permissions on an existing account?
 7. Can candidates apply without an account, and if so, when does the account get created?
-8. ~~Does CV text extraction happen client-side or on the server?~~ **Client-side**, in `ResumeParserService`. Which AI provider replaces `MockAiProvider` is still open — and whether the call goes direct from the browser or through our own backend, which is the only way to keep an API key out of the bundle.
+8. ~~Does CV text extraction happen client-side or on the server?~~ **Client-side**, in `ResumeParserService`. ~~Which AI provider replaces `MockAiProvider`?~~ **Google Gemini**, called direct from the browser. Still open: an API key in `environment.ts` ships inside the bundle, so a production build needs the call proxied through our own backend — `GeminiConfig.baseUrl` is the seam for that, and until then the committed key stays empty.
