@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { SEED_APPLICATIONS } from '@core/data/seed-data';
 import {
+  AiEvaluation,
   Application,
   ApplicationDraft,
   ApplicationView,
@@ -80,6 +81,24 @@ export class ApplicationStore {
     this.patch(id, { notes });
   }
 
+  /**
+   * Stores a screening result and the CV text it was derived from.
+   *
+   * Deliberately bypasses `patch`: that stamps `updatedAt`, which `recent`
+   * sorts on. Screening runs in the background minutes after a candidate
+   * applies, and it is not recruiter activity — letting it touch `updatedAt`
+   * would silently reshuffle the dashboard's recent list.
+   */
+  attachEvaluation(id: string, evaluation: AiEvaluation, resumeText: string): void {
+    this.state.update((applications) =>
+      applications.map((application) =>
+        application.id === id
+          ? { ...application, aiEvaluation: evaluation, resumeText }
+          : application,
+      ),
+    );
+  }
+
   /** Every application starts in `applied`, wherever it was submitted from. */
   apply(draft: ApplicationDraft): Application {
     const now = new Date().toISOString();
@@ -94,6 +113,8 @@ export class ApplicationStore {
       notes: '',
       coverLetter: draft.coverLetter?.trim() ?? '',
       resume: draft.resume ?? null,
+      resumeText: null,
+      aiEvaluation: null,
     };
     this.state.update((applications) => [application, ...applications]);
     return application;

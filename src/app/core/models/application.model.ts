@@ -1,3 +1,4 @@
+import { AiEvaluation } from './ai-evaluation.model';
 import { Candidate } from './candidate.model';
 import { Job } from './job.model';
 import { ResumeFile } from './resume.model';
@@ -19,6 +20,13 @@ export interface Application {
   readonly coverLetter: string;
   /** The CV sent with this application, independent of later profile updates. */
   readonly resume: ResumeFile | null;
+  /**
+   * Text extracted from `resume`. Kept so a recruiter can re-run the screening
+   * after a reload, when the uploaded `File` and its object URL are both gone.
+   */
+  readonly resumeText: string | null;
+  /** Latest AI screening verdict, or `null` if the CV was never screened. */
+  readonly aiEvaluation: AiEvaluation | null;
 }
 
 /** What the apply flow supplies; the store fills in id, stage and timestamps. */

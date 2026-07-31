@@ -13,8 +13,8 @@ import {
   withViewTransitions,
 } from '@angular/router';
 
-import { AiEvaluationService } from '@core/ai/ai-evaluation-service';
-import { MockAiEvaluationService } from '@core/ai/mock-ai-evaluation-service';
+import { AiProvider } from '@core/ai/ai-provider';
+import { MockAiProvider } from '@core/ai/mock-ai-provider';
 import { AppTitleStrategy } from '@core/app-title-strategy';
 import { apiBaseUrlInterceptor } from '@core/interceptors/api-base-url-interceptor';
 import { errorInterceptor } from '@core/interceptors/error-interceptor';
@@ -34,9 +34,10 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(withFetch(), withInterceptors([apiBaseUrlInterceptor, errorInterceptor])),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
-    // The seam for CV screening: point this at an HTTP-backed implementation
-    // and nothing else in the app changes.
-    { provide: AiEvaluationService, useExisting: MockAiEvaluationService },
+    // The seam for CV screening. Swapping to OpenAI, Claude, Gemini or Ollama
+    // means writing one class against `IAiProvider` and changing this line.
+    // Nothing else in the app moves.
+    { provide: AiProvider, useExisting: MockAiProvider },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
   ],
 };

@@ -4,6 +4,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
+import { AiProvider } from '@core/ai/ai-provider';
+import { MockAiProvider } from '@core/ai/mock-ai-provider';
 import { AuthService } from '@core/auth/auth-service';
 import { routes } from './app.routes';
 
@@ -23,6 +25,8 @@ describe('app routes', () => {
         provideZonelessChangeDetection(),
         provideRouter(routes, withComponentInputBinding()),
         provideLocationMocks(),
+        // Mirrors `app.config.ts`, since this drives the real route table.
+        { provide: AiProvider, useExisting: MockAiProvider },
       ],
     });
 

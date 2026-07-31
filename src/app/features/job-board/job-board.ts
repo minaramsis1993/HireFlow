@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
+import { AiEvaluationService } from '@core/ai/ai-evaluation-service';
 import { AuthService } from '@core/auth/auth-service';
 import { ApplicationView, Job, PIPELINE_STAGE_LABELS } from '@core/models';
 import { ApplicationStore } from '@core/services/application-store';
@@ -34,6 +35,7 @@ import { openApplyDialog } from './apply-dialog/apply-dialog';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobBoard {
+  private readonly aiEvaluation = inject(AiEvaluationService);
   private readonly auth = inject(AuthService);
   private readonly applicationStore = inject(ApplicationStore);
   private readonly candidateStore = inject(CandidateStore);
@@ -87,7 +89,7 @@ export class JobBoard {
       return;
     }
 
-    this.applicationStore.apply({
+    const application = this.applicationStore.apply({
       jobId: job.id,
       candidateId: profile.id,
       coverLetter: submission.coverLetter,
@@ -98,5 +100,14 @@ export class JobBoard {
     this.candidateStore.update(profile.id, { resume: submission.resume });
 
     this.notifications.success(`Application sent for ${job.title}.`);
+
+    // Screening reads the PDF and scores it in the background. Deliberately not
+    // awaited: the candidate is done, and the service reports failures through
+    // its own state rather than throwing.
+    void this.aiEvaluation.screen({
+      applicationId: application.id,
+      job,
+      file: submission.file,
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Account, Application, Candidate, Job } from '@core/models';
+import { Account, Application, Candidate, Job, RESUME_MIME_TYPE, ResumeFile } from '@core/models';
 
 /**
  * In-memory fixtures so the app is explorable before a backend exists.
@@ -289,6 +289,11 @@ export const SEED_CANDIDATES: readonly Candidate[] = [
   },
 ];
 
+/** A screened CV that predates this session; the bytes are long gone. */
+function seededResume(name: string, sizeBytes: number, uploadedAt: string): ResumeFile {
+  return { name, sizeBytes, mimeType: RESUME_MIME_TYPE, uploadedAt, url: null };
+}
+
 export const SEED_APPLICATIONS: readonly Application[] = [
   {
     id: 'app-1',
@@ -300,7 +305,35 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     updatedAt: '2026-07-18T15:00:00.000Z',
     notes: 'Strong design-system depth. Panel scheduled with the platform team.',
     coverLetter: '',
-    resume: null,
+    resume: seededResume('amara-bello-cv.pdf', 214_016, '2026-05-06T10:20:00.000Z'),
+    resumeText:
+      'Amara Bello — Frontend Engineer, Berlin. 7 years building customer-facing web ' +
+      'applications. Led the Angular design system at Klarhaus, shipping a token-driven ' +
+      'component library used by four product teams. Strong TypeScript across strict ' +
+      'codebases; drove the RxJS to signals migration. Accessibility lead for the WCAG 2.2 ' +
+      'AA audit. Previously React and Storybook at Nordwerk.',
+    aiEvaluation: {
+      rating: 5,
+      matchScore: 92,
+      summary:
+        'The CV evidences all three requirements for Senior Frontend Engineer, giving a 92% ' +
+        'match. It states around 7 years of experience. A strong fit worth moving forward quickly.',
+      strengths: [
+        '5+ years with Angular or React — CV mentions angular, react.',
+        'Strong TypeScript — CV mentions typescript.',
+        'Design system experience — CV mentions design, system.',
+      ],
+      weaknesses: ['No backend or API design work is described.'],
+      missingSkills: ['Node.js'],
+      recommendedStage: 'interview',
+      interviewQuestions: [
+        'Your CV mentions angular — walk us through the project where you used it most heavily.',
+        'You led an RxJS to signals migration. What broke, and how did you sequence it?',
+        'How would you approach your first 90 days as a Senior Frontend Engineer?',
+      ],
+      model: 'mock-screener-v1',
+      generatedAt: '2026-05-06T10:21:00.000Z',
+    },
   },
   {
     id: 'app-2',
@@ -313,6 +346,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: 'Offer approved at the top of band. Awaiting signature.',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-3',
@@ -324,7 +359,35 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     updatedAt: '2026-07-10T11:00:00.000Z',
     notes: 'Good performance background, needs a deeper accessibility check.',
     coverLetter: '',
-    resume: null,
+    resume: seededResume('r-okafor-resume.pdf', 168_432, '2026-05-15T08:00:00.000Z'),
+    resumeText:
+      'Frontend developer, 4 years. Built dashboards in React and Redux for a logistics ' +
+      'platform. Focus on rendering performance: virtualised tables, bundle splitting, ' +
+      'Core Web Vitals work that cut LCP by 40%. Comfortable in JavaScript; some exposure ' +
+      'to TypeScript on newer services. Worked from Figma handoffs provided by the design team.',
+    aiEvaluation: {
+      rating: 3,
+      matchScore: 58,
+      summary:
+        'The CV evidences 1 of 3 requirements for Senior Frontend Engineer, giving a 58% ' +
+        'match. It states around 4 years of experience. A partial fit — worth a screening ' +
+        'call to probe the gaps.',
+      strengths: ['5+ years with Angular or React — CV mentions react.'],
+      weaknesses: [
+        'No evidence of "Strong TypeScript" in the CV — described only as "some exposure".',
+        'No evidence of "Design system experience" in the CV; consumed designs rather than owning a system.',
+      ],
+      missingSkills: ['TypeScript', 'Design systems', 'Accessibility'],
+      recommendedStage: 'screening',
+      interviewQuestions: [
+        'Your CV mentions react — walk us through the project where you used it most heavily.',
+        "We didn't see TypeScript depth anywhere in your CV. What exposure have you had to it?",
+        'Have you ever owned a shared component library rather than consuming one?',
+        'How would you approach your first 90 days as a Senior Frontend Engineer?',
+      ],
+      model: 'mock-screener-v1',
+      generatedAt: '2026-05-15T08:01:00.000Z',
+    },
   },
   {
     id: 'app-4',
@@ -337,6 +400,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: '',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-5',
@@ -348,7 +413,35 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     updatedAt: '2026-07-20T16:20:00.000Z',
     notes: 'Portfolio review went well. Product sense interview next.',
     coverLetter: '',
-    resume: null,
+    resume: seededResume('product-designer-portfolio.pdf', 402_944, '2026-05-21T14:10:00.000Z'),
+    resumeText:
+      'Product designer, 6 years, remote-first. Shipped B2B workflow tools for two SaaS ' +
+      'companies: a claims console and an internal admin platform, both end to end from ' +
+      'discovery to delivery. Day-to-day in Figma — components, variants, auto-layout, and ' +
+      'a shared library maintained for six designers. Ran generative and evaluative user ' +
+      'research, including 30+ moderated sessions and unmoderated testing.',
+    aiEvaluation: {
+      rating: 4,
+      matchScore: 83,
+      summary:
+        'The CV evidences all three requirements for Product Designer, giving an 83% match. ' +
+        'It states around 6 years of experience. A strong fit worth moving forward quickly.',
+      strengths: [
+        'Portfolio of shipped B2B products — CV mentions portfolio, shipped, b2b, products.',
+        'Figma fluency — CV mentions figma.',
+        'Comfort with user research — CV mentions user, research.',
+      ],
+      weaknesses: ['No named recruiting or ATS domain experience.'],
+      missingSkills: ['Design tokens'],
+      recommendedStage: 'interview',
+      interviewQuestions: [
+        'Your CV mentions figma — walk us through the project where you used it most heavily.',
+        'Which of your two B2B tools taught you the most, and what would you redo?',
+        'How would you approach your first 90 days as a Product Designer?',
+      ],
+      model: 'mock-screener-v1',
+      generatedAt: '2026-05-21T14:11:00.000Z',
+    },
   },
   {
     id: 'app-6',
@@ -360,7 +453,37 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     updatedAt: '2026-07-14T10:05:00.000Z',
     notes: 'Junior for the band but a very strong research process.',
     coverLetter: '',
-    resume: null,
+    resume: seededResume('junior-designer-cv.pdf', 121_856, '2026-05-26T13:15:00.000Z'),
+    resumeText:
+      'Designer, 2 years. Consumer mobile app work: onboarding, notifications, and a ' +
+      'referral flow. Strong qualitative user research practice — diary studies, interview ' +
+      'scripts, and synthesis workshops. Tooling is Figma and FigJam daily.',
+    aiEvaluation: {
+      rating: 3,
+      matchScore: 61,
+      summary:
+        'The CV evidences 2 of 3 requirements for Product Designer, giving a 61% match. ' +
+        'It states around 2 years of experience. A partial fit — worth a screening call to ' +
+        'probe the gaps.',
+      strengths: [
+        'Figma fluency — CV mentions figma.',
+        'Comfort with user research — CV mentions user, research.',
+      ],
+      weaknesses: [
+        'No evidence of "Portfolio of shipped B2B products" in the CV — the work described is consumer mobile.',
+        'The CV is short on delivery detail for a mid-level band.',
+      ],
+      missingSkills: ['B2B', 'Enterprise workflows'],
+      recommendedStage: 'screening',
+      interviewQuestions: [
+        'Your CV mentions figma — walk us through the project where you used it most heavily.',
+        "We didn't see any B2B work in your CV. What draws you to workflow tooling?",
+        'Your research practice looks strong — how do you decide what not to research?',
+        'How would you approach your first 90 days as a Product Designer?',
+      ],
+      model: 'mock-screener-v1',
+      generatedAt: '2026-05-26T13:16:00.000Z',
+    },
   },
   {
     id: 'app-7',
@@ -373,6 +496,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: 'Verbal offer extended.',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-8',
@@ -385,6 +510,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: 'Looking for a role with more operations ownership.',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-9',
@@ -397,6 +524,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: 'Signed. Start date 1 September.',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-10',
@@ -409,6 +538,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: 'On hold while the requisition is paused.',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-11',
@@ -421,6 +552,8 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: 'Better fit for the engineering requisition.',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
   {
     id: 'app-12',
@@ -433,5 +566,7 @@ export const SEED_APPLICATIONS: readonly Application[] = [
     notes: '',
     coverLetter: '',
     resume: null,
+    resumeText: null,
+    aiEvaluation: null,
   },
 ];

@@ -85,4 +85,24 @@ describe('ApplyDialog', () => {
     expect(submission.resume.mimeType).toBe('application/pdf');
     expect(submission.resume.url).toBeTruthy();
   });
+
+  // `ResumeFile` keeps metadata only, so this is the one chance to read the PDF.
+  it('hands back the raw PDF so it can be screened', async () => {
+    await attach('amara-bello.pdf', 'application/pdf');
+
+    submitButton().click();
+    await fixture.whenStable();
+
+    const submission = dialogRef.close.calls.mostRecent().args[0] as ApplySubmission;
+    expect(submission.file instanceof File).toBeTrue();
+    expect(submission.file.name).toBe('amara-bello.pdf');
+    expect(submission.file.type).toBe('application/pdf');
+  });
+
+  it('forgets the raw file when a replacement is rejected', async () => {
+    await attach('amara-bello.pdf', 'application/pdf');
+    await attach('cv.docx', 'application/msword');
+
+    expect(submitButton().disabled).toBeTrue();
+  });
 });

@@ -22,6 +22,12 @@ export interface ApplyDialogData {
 export interface ApplySubmission {
   readonly resume: ResumeFile;
   readonly coverLetter: string;
+  /**
+   * The uploaded PDF itself. `ResumeFile` keeps metadata only, so this is the
+   * one moment the bytes are reachable — AI screening reads its text here or
+   * not at all.
+   */
+  readonly file: File;
 }
 
 /**
@@ -132,6 +138,9 @@ export class ApplyDialog {
   protected readonly resume = signal<ResumeFile | null>(null);
   protected readonly fileError = signal('');
 
+  /** Held alongside `resume` so the raw PDF can be screened after submission. */
+  private readonly file = signal<File | null>(null);
+
   protected readonly form = this.formBuilder.nonNullable.group({
     coverLetter: ['', Validators.maxLength(2000)],
   });
@@ -147,11 +156,13 @@ export class ApplyDialog {
     if (rejection) {
       this.fileError.set(rejection);
       this.resume.set(null);
+      this.file.set(null);
       input.value = '';
       return;
     }
 
     this.fileError.set('');
+    this.file.set(file);
     this.resume.set({
       name: file.name,
       sizeBytes: file.size,
@@ -163,7 +174,8 @@ export class ApplyDialog {
 
   protected submit(): void {
     const resume = this.resume();
-    if (!resume) {
+    const file = this.file();
+    if (!resume || !file) {
       this.fileError.set('Attach your CV as a PDF to apply.');
       return;
     }
@@ -173,7 +185,11 @@ export class ApplyDialog {
       return;
     }
 
-    this.dialogRef.close({ resume, coverLetter: this.form.getRawValue().coverLetter.trim() });
+    this.dialogRef.close({
+      resume,
+      file,
+      coverLetter: this.form.getRawValue().coverLetter.trim(),
+    });
   }
 }
 

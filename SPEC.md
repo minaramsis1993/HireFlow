@@ -16,7 +16,7 @@ Status: prototype built on in-memory data. Authentication is mocked in `localSto
 - Stay usable by hiring managers and interviewers, not just recruiters.
 - Stay small enough for one team to build and run.
 
-**Not building:** payroll or onboarding, AI résumé scoring, paid job-board syndication, custom workflow builders, native mobile apps.
+**Not building:** payroll or onboarding, paid job-board syndication, custom workflow builders, native mobile apps.
 
 ---
 
@@ -60,6 +60,7 @@ Both roles resolve `/jobs`, to different pages — recruiters get the requisitio
 - **Job board** — candidates browse open roles and apply in a dialog with a PDF CV and optional cover letter.
 - **My applications** — candidates track their own submissions and stages; recruiter ratings and notes stay hidden.
 - **Candidate profile** — headline, location, experience, skills and CV, editable by the candidate.
+- **AI CV screening** — an uploaded PDF is parsed and scored against the job description on submission; the recruiter sees a rating, match score, summary, strengths, weaknesses, missing skills, a recommended next stage and suggested interview questions, and can re-run it.
 - **Platform** — responsive layout, light/dark theme, lazy-loaded routes, deep links.
 
 ### Still needed to ship
@@ -77,7 +78,7 @@ Both roles resolve `/jobs`, to different pages — recruiters get the requisitio
 
 ## Future features
 
-**Next:** AI CV screening behind `AiEvaluationService` (see below) · scorecards for structured interview feedback · interview scheduling with calendar invites · in-app email threads per candidate · custom stages per job · bulk actions.
+**Next:** a real `IAiProvider` implementation to replace `MockAiProvider` · scorecards for structured interview feedback · interview scheduling with calendar invites · in-app email threads per candidate · custom stages per job · bulk actions.
 
 **Later:** job-board distribution (Indeed, LinkedIn) · referral portal · reporting on time-to-hire and source quality · branded careers page · screening questions.
 
@@ -115,7 +116,21 @@ Hiding a nav link is convenience; the guards are the enforcement — and once th
 
 ### AI seam
 
-`AiEvaluationService` (in `core/ai/`) is an abstract class used as its own DI token, describing the intended pipeline: extract CV text → compare with the job description → summary, 0-100 match score, suggested 1-5 rating, interview questions. `MockAiEvaluationService` implements it with keyword overlap and is wired in `app.config.ts`. Nothing calls it yet — that is deliberate. Pointing the provider at an HTTP implementation is the whole integration, because the return shapes are already fixed.
+CV screening lives in `core/ai/`, split so that only one piece is provider-specific:
+
+```
+PDF → ResumeParserService → PromptBuilderService → IAiProvider → AiEvaluation
+    → ApplicationStore.attachEvaluation()
+```
+
+- **`ResumeParserService`** extracts plain text with `pdfjs-dist`, loaded by dynamic `import()` so it stays out of the initial bundle. Its worker ships via an `assets` entry in `angular.json`.
+- **`PromptBuilderService`** renders job title, description, requirements and CV text into a prompt. Pure and deterministic.
+- **`IAiProvider`** (abstract class `AiProvider`, used as its own DI token) sends a prompt and returns the model's **raw text**. It never parses — `parseAiEvaluation` in `core/models` validates once for every provider, clamping ranges, unwrapping code fences and mapping invented stage names onto real `PipelineStage` values.
+- **`AiEvaluationService`** orchestrates the above, holds per-application progress in a signal, and is the only AI class a component touches.
+
+`MockAiProvider` scores the extracted CV text against the job's requirements — no network, no API key — and is wired in `app.config.ts`. **Swapping to OpenAI, Claude, Gemini or Ollama means writing one class against `IAiProvider` and changing that one line.** Nothing else moves.
+
+Screening runs automatically in the background when a candidate submits, and a recruiter can re-run it from the candidate profile. The finished `AiEvaluation` is stored on the `Application` along with the extracted `resumeText`, which is what makes a re-run work after a reload — by then the uploaded `File` and its object URL are both gone. `attachEvaluation` deliberately leaves `updatedAt` alone so background screening does not reorder the dashboard's recent activity.
 
 **Target** — the same app against a real backend:
 
@@ -157,7 +172,8 @@ src/app/
 ├── app.ts · app.config.ts · app.routes.ts
 │
 ├── core/                  # singletons — never a component
-│   ├── ai/                # AiEvaluationService contract + mock
+│   ├── ai/                # IAiProvider + mock, resume parser, prompt builder,
+│   │                      # AiEvaluationService orchestrator
 │   ├── auth/              # AuthService, auth/role/guest guards
 │   ├── data/              # seed fixtures (delete once the API lands)
 │   ├── interceptors/
@@ -205,4 +221,4 @@ Planned: `features/careers/` (public, no account), `features/settings/`, `featur
 5. Email provider — and do we need inbound replies landing on the candidate record?
 6. Do hiring manager and interviewer become roles, or per-job permissions on an existing account?
 7. Can candidates apply without an account, and if so, when does the account get created?
-8. Which AI provider, and does CV text extraction happen client-side or on the server?
+8. ~~Does CV text extraction happen client-side or on the server?~~ **Client-side**, in `ResumeParserService`. Which AI provider replaces `MockAiProvider` is still open — and whether the call goes direct from the browser or through our own backend, which is the only way to keep an API key out of the bundle.

@@ -7,7 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 
+import { AiEvaluationService } from '@core/ai/ai-evaluation-service';
 import {
+  AiScreeningState,
   ApplicationView,
   CANDIDATE_SOURCE_LABELS,
   candidateFullName,
@@ -20,6 +22,7 @@ import { ApplicationStore } from '@core/services/application-store';
 import { CandidateStore } from '@core/services/candidate-store';
 import { NotificationService } from '@core/services/notification-service';
 import { TimeAgoPipe } from '@shared/pipes/time-ago-pipe';
+import { AiEvaluationCard } from '@shared/ui/ai-evaluation-card/ai-evaluation-card';
 import { EmptyState } from '@shared/ui/empty-state/empty-state';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { RatingStars } from '@shared/ui/rating-stars/rating-stars';
@@ -28,6 +31,7 @@ import { ResumeChip } from '@shared/ui/resume-chip/resume-chip';
 @Component({
   selector: 'app-candidate-detail',
   imports: [
+    AiEvaluationCard,
     DatePipe,
     EmptyState,
     MatButtonModule,
@@ -46,6 +50,7 @@ import { ResumeChip } from '@shared/ui/resume-chip/resume-chip';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CandidateDetail {
+  private readonly aiEvaluation = inject(AiEvaluationService);
   private readonly candidateStore = inject(CandidateStore);
   private readonly applicationStore = inject(ApplicationStore);
   private readonly notifications = inject(NotificationService);
@@ -67,6 +72,26 @@ export class CandidateDetail {
   protected moveStage(applicationId: string, stage: PipelineStage): void {
     this.applicationStore.moveToStage(applicationId, stage);
     this.notifications.success(`Moved to ${PIPELINE_STAGE_LABELS[stage]}.`);
+  }
+
+  protected screeningState(applicationId: string): AiScreeningState {
+    return this.aiEvaluation.stateFor(applicationId);
+  }
+
+  /**
+   * Re-runs screening from the CV text stored on the application, so it works
+   * even after a reload has discarded the uploaded file.
+   */
+  protected async evaluate(application: ApplicationView): Promise<void> {
+    await this.aiEvaluation.reEvaluate(application.id);
+
+    const { phase, error } = this.aiEvaluation.stateFor(application.id);
+    if (phase === 'failed') {
+      this.notifications.error(error ?? 'The evaluation could not be completed.');
+      return;
+    }
+
+    this.notifications.success(`Evaluated ${this.fullName(application.candidate)}'s CV.`);
   }
 
   protected rate(applicationId: string, rating: number): void {

@@ -110,6 +110,13 @@
             </details>
           }
 
+          <app-ai-evaluation-card
+            [evaluation]="application.aiEvaluation"
+            [state]="screeningState(application.id)"
+            (reRun)="evaluate(application)"
+            (stageAccepted)="moveStage(application.id, $event)"
+          />
+
           <mat-form-field class="application__notes" subscriptSizing="dynamic">
             <mat-label>Notes</mat-label>
             <textarea

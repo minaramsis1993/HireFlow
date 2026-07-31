@@ -90,4 +90,60 @@ describe('ApplicationStore', () => {
     const updated = store.applications().find((a) => a.id === application.id);
     expect(updated!.updatedAt >= application.updatedAt).toBeTrue();
   });
+
+  it('starts new applications unscreened', () => {
+    const created = store.apply({
+      jobId: jobStore.jobs()[0].id,
+      candidateId: candidateStore.candidates()[0].id,
+    });
+
+    expect(created.aiEvaluation).toBeNull();
+    expect(created.resumeText).toBeNull();
+  });
+
+  describe('attachEvaluation', () => {
+    const evaluation = {
+      rating: 4,
+      matchScore: 87,
+      summary: 'Good overlap.',
+      strengths: ['Angular'],
+      weaknesses: [],
+      missingSkills: ['AWS'],
+      recommendedStage: 'interview' as const,
+      interviewQuestions: ['Tell us more.'],
+      model: 'test-model',
+      generatedAt: '2026-07-30T09:00:00.000Z',
+    };
+
+    it('stores the evaluation and the CV text it came from', () => {
+      const application = store.applications()[0];
+
+      store.attachEvaluation(application.id, evaluation, 'extracted cv text');
+
+      const updated = store.applications().find((a) => a.id === application.id);
+      expect(updated!.aiEvaluation).toEqual(evaluation);
+      expect(updated!.resumeText).toBe('extracted cv text');
+    });
+
+    // Screening runs in the background and is not recruiter activity, so it must
+    // not reshuffle the dashboard's recent list.
+    it('leaves updatedAt alone', () => {
+      const application = store.applications()[0];
+      const recentBefore = store.recent().map((view) => view.id);
+
+      store.attachEvaluation(application.id, evaluation, 'extracted cv text');
+
+      const updated = store.applications().find((a) => a.id === application.id);
+      expect(updated!.updatedAt).toBe(application.updatedAt);
+      expect(store.recent().map((view) => view.id)).toEqual(recentBefore);
+    });
+
+    it('ignores an id that no longer exists', () => {
+      const before = store.applications();
+
+      store.attachEvaluation('app-gone', evaluation, 'text');
+
+      expect(store.applications().length).toBe(before.length);
+    });
+  });
 });

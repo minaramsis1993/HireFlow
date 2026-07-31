@@ -2,6 +2,8 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { AiProvider } from '@core/ai/ai-provider';
+import { MockAiProvider } from '@core/ai/mock-ai-provider';
 import { AuthService } from '@core/auth/auth-service';
 import { ApplicationStore } from '@core/services/application-store';
 import { JobStore } from '@core/services/job-store';
@@ -18,7 +20,11 @@ describe('JobBoard', () => {
 
     await TestBed.configureTestingModule({
       imports: [JobBoard],
-      providers: [provideZonelessChangeDetection(), provideRouter([])],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: AiProvider, useExisting: MockAiProvider },
+      ],
     }).compileComponents();
 
     auth = TestBed.inject(AuthService);
